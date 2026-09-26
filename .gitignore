@@ -20,6 +20,10 @@ __pycache__/
 # Local database/state
 data/db/
 
+# Isolated synthetic ML demonstration artifacts
+/data/ml_experiment/
+/models/ml_experiment/
+
 # OS files
 .DS_Store
 Thumbs.db

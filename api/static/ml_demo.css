@@ -1,0 +1,13 @@
+.ml-demo { max-width: 1100px; margin: 2rem auto; padding: 0 1.5rem 3rem; }
+.ml-demo header { margin-bottom: 1.5rem; }
+.ml-demo h1, .ml-demo h2 { color: #e6e6e6; margin: 0.5rem 0 1rem; }
+.ml-demo p { color: #c0c4cc; line-height: 1.5; margin: 0.5rem 0; }
+.ml-demo .eyebrow { color: #4fd1c5; letter-spacing: 0.12em; font-size: 0.75rem; }
+.ml-demo .disclaimer { border-left: 3px solid #f0b44d; padding: 0.65rem 0.9rem; background: #1a1d27; }
+.ml-demo section { margin-top: 1.5rem; }
+.ml-demo .metrics, .ml-demo .prediction { background: #1a1d27; border: 1px solid #333846; border-radius: 8px; padding: 1rem; margin: 0.75rem 0; }
+.ml-demo .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0.75rem; }
+.ml-demo .metric-label { color: #9aa1ac; font-size: 0.8rem; }
+.ml-demo .metric-value { color: #4fd1c5; font-size: 1.1rem; }
+.ml-demo .prediction strong { color: #e6e6e6; }
+.ml-demo .state-error { color: #ff8a8a; }

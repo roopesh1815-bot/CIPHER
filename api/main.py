@@ -24,6 +24,7 @@ from api.routers import (
     graph as graph_router,
     hidden_links as hidden_links_router,
     influencers as influencers_router,
+    ml_demo as ml_demo_router,
     risk as risk_router,
 )
 
@@ -45,6 +46,7 @@ app.include_router(risk_router.router)
 app.include_router(alerts_router.router)
 app.include_router(hidden_links_router.router)
 app.include_router(communities_router.router)
+app.include_router(ml_demo_router.router)
 
 
 @app.on_event("startup")
@@ -105,6 +107,11 @@ def hidden_links_page(request: Request, user: dict = Depends(get_current_user)):
 @app.get("/communities")
 def communities_page(request: Request, user: dict = Depends(get_current_user)):
     return templates.TemplateResponse(request, "communities.html", {})
+
+
+@app.get("/ml-demo")
+def ml_demo_page(request: Request, user: dict = Depends(get_current_user)):
+    return templates.TemplateResponse(request, "ml_demo.html", {})
 
 
 @app.get("/cases/{fir_id}/graph")
