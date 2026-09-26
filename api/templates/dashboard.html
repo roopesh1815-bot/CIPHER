@@ -2,8 +2,11 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>CIPHER — Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>CIPHER — Investigation Overview</title>
     <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/dashboard.css?v=7">
+    <script src="/static/vendor/vis-network.min.js"></script>
 </head>
 <body>
     <nav class="topbar">
@@ -14,14 +17,143 @@
             <a href="/network-graph">Network Graph</a>
             <a href="/key-influencers">Key Influencers</a>
             <a href="/risk-scoring">Risk Scoring</a>
-            <a href="/communities">Communities</a>
+            <a href="/alerts">Alerts</a>
             <a href="/hidden-links">Hidden Links</a>
+            <a href="/communities">Communities</a>
         </div>
         <a href="/auth/logout" class="logout-link">Logout</a>
     </nav>
-    <main class="content">
-        <h1>Dashboard</h1>
-        <p>Login successful — this is a placeholder. Real pages (Overview, Risk Scores, etc.) come next.</p>
+
+    <main class="dashboard">
+        <header class="dashboard-heading">
+            <div>
+                <p class="eyebrow">INVESTIGATION WORKSPACE</p>
+                <h1>CIPHER Investigation Overview</h1>
+                <p class="subtitle">A data-led view of connected entities, case context, and items for investigator review.</p>
+            </div>
+            <a class="module-link" href="/cases">Open Case Manager <span aria-hidden="true">→</span></a>
+        </header>
+
+        <section class="overview-metrics" aria-label="Investigation overview counts">
+            <article class="metric">
+                <span class="metric-label">Cases</span>
+                <strong id="metric-cases" class="metric-value" aria-live="polite">Loading</strong>
+                <span class="metric-caption">Available case records</span>
+            </article>
+            <article class="metric">
+                <span class="metric-label">Entities</span>
+                <strong id="metric-entities" class="metric-value" aria-live="polite">Loading</strong>
+                <span class="metric-caption">In the network graph</span>
+            </article>
+            <article class="metric">
+                <span class="metric-label">Relationships</span>
+                <strong id="metric-relationships" class="metric-value" aria-live="polite">Loading</strong>
+                <span class="metric-caption">Data-derived graph edges</span>
+            </article>
+            <article class="metric metric-review">
+                <span class="metric-label">Items for review</span>
+                <strong id="metric-alerts" class="metric-value" aria-live="polite">Loading</strong>
+                <span class="metric-caption">Alerts from available analysis</span>
+            </article>
+        </section>
+
+        <section class="network-section panel">
+            <div class="section-heading network-heading">
+                <div>
+                    <p class="eyebrow">RELATIONSHIP OVERVIEW</p>
+                    <h2>Investigation Network</h2>
+                    <p class="section-description">Observed graph relationships and case-record associations are shown separately from AI suggestions.</p>
+                </div>
+                <label class="key-player-picker">
+                    <span>Key Player</span>
+                    <select id="key-player-selector" aria-label="Select a key player"></select>
+                </label>
+            </div>
+            <div class="network-legend" aria-label="Network legend">
+                <span><i class="legend-dot legend-key"></i>Selected key entity</span>
+                <span><i class="legend-dot legend-entity"></i>Connected entity</span>
+                <span><i class="legend-dot legend-case"></i>Associated case</span>
+                <span><i class="legend-line"></i>Data-derived relationship</span>
+            </div>
+            <div class="network-layout">
+                <div class="network-canvas-wrap">
+                    <div id="investigation-network" role="img" aria-label="Interactive investigation relationship graph"></div>
+                    <div id="network-state" class="panel-state">Loading graph data…</div>
+                    <div class="network-footer">
+                        <span id="network-counts">Loading network…</span>
+                        <a href="/network-graph">Explore full network →</a>
+                    </div>
+                </div>
+                <aside class="entity-context" aria-labelledby="key-player-title">
+                    <p class="eyebrow">SELECTED ENTITY</p>
+                    <h3 id="key-player-title">Key Player</h3>
+                    <div id="key-player-details" class="context-content">
+                        <p class="panel-state">Loading centrality results…</p>
+                    </div>
+                    <div class="case-context">
+                        <div class="subsection-heading">
+                            <h4>Associated case context</h4>
+                            <a href="/cases">All cases</a>
+                        </div>
+                        <div id="key-player-cases" class="context-content">
+                            <p class="panel-state">Loading case associations…</p>
+                        </div>
+                    </div>
+                    <p class="neutral-note">Influence measures network position; they are not evidence of wrongdoing.</p>
+                </aside>
+            </div>
+        </section>
+
+        <section class="review-grid" aria-label="Investigation review information">
+            <article class="panel review-panel">
+                <div class="section-heading compact-heading">
+                    <div>
+                        <p class="eyebrow">ACTIVITY TO REVIEW</p>
+                        <h2>Alerts</h2>
+                    </div>
+                    <a href="/alerts">Open alerts →</a>
+                </div>
+                <div id="alerts-list" class="review-list"><p class="panel-state">Loading alerts…</p></div>
+            </article>
+
+            <article class="panel review-panel">
+                <div class="section-heading compact-heading">
+                    <div>
+                        <p class="eyebrow">INVESTIGATOR REVIEW</p>
+                        <h2>Priority for Review</h2>
+                    </div>
+                    <a href="/risk-scoring">Risk scoring →</a>
+                </div>
+                <p class="neutral-note">Risk-scoring output is a review signal, not a finding.</p>
+                <div id="priority-list" class="review-list"><p class="panel-state">Loading priorities…</p></div>
+            </article>
+
+            <article class="panel review-panel suggested-panel">
+                <div class="section-heading compact-heading">
+                    <div>
+                        <p class="eyebrow">SEPARATE FROM OBSERVED GRAPH</p>
+                        <h2>AI-Suggested Links</h2>
+                    </div>
+                    <a href="/hidden-links">Review suggestions →</a>
+                </div>
+                <p class="suggestion-disclaimer">AI-suggested — not a confirmed link</p>
+                <div id="suggestions-list" class="review-list"><p class="panel-state">Loading suggestions…</p></div>
+            </article>
+
+            <article class="panel review-panel community-panel">
+                <div class="section-heading compact-heading">
+                    <div>
+                        <p class="eyebrow">GRAPH ANALYSIS</p>
+                        <h2>Detected Communities</h2>
+                    </div>
+                    <a href="/communities">Explore communities →</a>
+                </div>
+                <p class="neutral-note">Algorithmic groupings for investigator review; not confirmed criminal groups.</p>
+                <div id="communities-summary" class="review-list"><p class="panel-state">Loading communities…</p></div>
+            </article>
+        </section>
     </main>
+
+    <script src="/static/dashboard.js?v=7"></script>
 </body>
 </html>

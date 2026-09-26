@@ -5,6 +5,7 @@ produced by pipeline/intelligence/case_summariser.py) merged with the
 `cases` DB table (status, district, folder_path) and case_entities.
 """
 
+import csv
 import json
 import logging
 from pathlib import Path
@@ -12,13 +13,46 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.security import get_current_user
-from core.config import CASE_SUMMARIES_JSON
+from core.config import CASE_SUMMARIES_JSON, ENTITIES_CSV
 from core.db import fetch_all, fetch_one
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/cases", tags=["cases"])
 
 _summaries_cache: dict[str, dict] | None = None
+_entity_identity_cache: dict[str, dict] | None = None
+
+_ENTITY_TYPE_ALIASES = {
+    "phone": "mobile",
+    "celltower": "cell tower",
+    "socialhandle": "social handle",
+}
+
+
+def _load_entity_identities() -> dict[str, dict]:
+    """Load canonical IDs and labels from the existing resolved-entity output."""
+    global _entity_identity_cache
+    if _entity_identity_cache is None:
+        if not ENTITIES_CSV.exists():
+            raise HTTPException(
+                status_code=503,
+                detail="entities.csv not found — run entity resolution first",
+            )
+        with ENTITIES_CSV.open(encoding="utf-8-sig", newline="") as entity_file:
+            rows = csv.DictReader(entity_file)
+            _entity_identity_cache = {
+                row["Canonical_ID"]: {
+                    "entity_label": row["Entity_Value"],
+                    "entity_type": row["Entity_Type"],
+                }
+                for row in rows
+            }
+    return _entity_identity_cache
+
+
+def _normalize_entity_type(value: object) -> str:
+    entity_type = str(value or "").strip().casefold()
+    return _ENTITY_TYPE_ALIASES.get(entity_type, entity_type)
 
 
 def _load_summaries() -> dict[str, dict]:
@@ -104,6 +138,83 @@ def get_crime_types(user: dict = Depends(get_current_user)):
     summaries = _load_summaries()
     types = sorted({s.get("Crime_Type", "Unknown") for s in summaries.values()})
     return {"crime_types": types}
+
+
+@router.get("/entity/{canonical_id}")
+def get_entity_cases(
+    canonical_id: str,
+    user: dict = Depends(get_current_user),
+):
+    """Return existing case-entity records associated with a canonical entity."""
+    identities = _load_entity_identities()
+    identity = identities.get(canonical_id)
+    if identity is None:
+        raise HTTPException(status_code=404, detail=f"Entity {canonical_id} not found")
+
+    entity_label = identity["entity_label"]
+    entity_type = _normalize_entity_type(identity["entity_type"])
+    ambiguous_ids = [
+        entity_id
+        for entity_id, candidate in identities.items()
+        if entity_id != canonical_id
+        and candidate["entity_label"].casefold() == entity_label.casefold()
+        and _normalize_entity_type(candidate["entity_type"]) == entity_type
+    ]
+    if ambiguous_ids:
+        raise HTTPException(
+            status_code=409,
+            detail=f"Case associations for entity {canonical_id} are ambiguous by label and type",
+        )
+
+    records = fetch_all(
+        """SELECT c.fir_id, c.crime_type, c.district, c.status, c.fir_date,
+                  ce.entity_label, ce.entity_type, ce.role,
+                  ce.confidence_tier, ce.source
+           FROM case_entities AS ce
+           JOIN cases AS c ON c.fir_id = ce.fir_id"""
+    )
+    matching_records = [
+        record
+        for record in records
+        if str(record.get("entity_label") or "").casefold() == entity_label.casefold()
+        and _normalize_entity_type(record.get("entity_type")) == entity_type
+    ]
+    cases_by_id: dict[str, dict] = {}
+    for record in matching_records:
+        fir_id = record["fir_id"]
+        case_record = cases_by_id.setdefault(
+            fir_id,
+            {
+                "fir_id": fir_id,
+                "crime_type": record.get("crime_type"),
+                "district": record.get("district"),
+                "status": record.get("status"),
+                "fir_date": record.get("fir_date"),
+                "entity_records": [],
+            },
+        )
+        case_record["entity_records"].append(
+            {
+                "entity_label": record.get("entity_label"),
+                "entity_type": record.get("entity_type"),
+                "role": record.get("role"),
+                "confidence_tier": record.get("confidence_tier"),
+                "source": record.get("source"),
+            }
+        )
+    associated_cases = sorted(
+        cases_by_id.values(),
+        key=lambda case_record: (case_record.get("fir_date") or "", case_record["fir_id"]),
+        reverse=True,
+    )
+
+    return {
+        "canonical_id": canonical_id,
+        "entity_label": entity_label,
+        "entity_type": identity["entity_type"],
+        "cases": associated_cases,
+        "total": len(associated_cases),
+    }
 
 
 @router.get("/{fir_id}")
