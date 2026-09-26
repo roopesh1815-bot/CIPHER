@@ -158,6 +158,11 @@
     font-size: 0.85rem;
 }
 
+.case-banner .case-graph-note {
+    color: #c4b5fd;
+    font-size: 0.75rem;
+}
+
 .case-banner select {
     width: auto;
 }

@@ -7,6 +7,11 @@
 .case-graph-header h2 { color: #2dd4bf; margin: 0; font-size: 18px; }
 .back-link { color: #9ca3af; text-decoration: none; font-size: 14px; }
 .back-link:hover { color: #2dd4bf; }
+.case-graph-note {
+  padding: 8px 24px;
+  color: #c4b5fd;
+  font-size: 12px;
+}
 
 #graph-container {
   flex: 1;

@@ -1,5 +1,7 @@
 let network = null;
 let caseMode = null; // holds the FIR_ID string when viewing a case-scoped graph, else null
+const CASE_RING_RADIUS = 260;
+const CASE_CONTEXT_RADIUS = 440;
 
 function getUrlParam(name) {
     return new URLSearchParams(window.location.search).get(name);
@@ -47,33 +49,75 @@ function renderGraph(data) {
         <div>Total in graph: ${data.meta.full_meta.node_count} nodes</div>
     `;
 
-    const nodesDataset = new vis.DataSet(data.nodes.map(n => ({
-        id: n.id,
-        label: n.label,
-        color: n.is_case_entity
-            ? { background: n.color, border: "#ffcc00" }
-            : n.color,
-        borderWidth: n.is_case_entity ? 3 : 1,
-        size: Math.max(8, Math.min(n.size, 50)),
-        title: `${n.label} (${n.entity_type})${n.is_case_entity ? " — case entity" : ""}`,
-    })));
+    const centerNode = caseMode
+        ? data.nodes.find(n => n.is_case_center === true)
+        : null;
+    const radialPositions = {};
+    if (centerNode) {
+        const orbitNodes = data.nodes.filter(n => n.id !== centerNode.id);
+        const caseNodes = orbitNodes.filter(n => n.is_case_entity);
+        const contextNodes = orbitNodes.filter(n => !n.is_case_entity);
+        [[caseNodes, CASE_RING_RADIUS], [contextNodes, CASE_CONTEXT_RADIUS]].forEach(([nodes, radius]) => {
+            nodes.forEach((n, index) => {
+                const angle = (2 * Math.PI * index) / nodes.length;
+                radialPositions[n.id] = { x: radius * Math.cos(angle), y: radius * Math.sin(angle) };
+            });
+        });
+    }
 
-    const edgesDataset = new vis.DataSet(data.edges.map(e => ({
-        from: e.from,
-        to: e.to,
-        title: e.title,
-        width: Math.max(0.5, Math.min(e.value, 5)),
-        color: { color: "#333846", highlight: "#4fd1c5" },
-    })));
+    const nodesDataset = new vis.DataSet(data.nodes.map(n => {
+        const isCenter = n.id === (centerNode && centerNode.id);
+        const position = isCenter ? { x: 0, y: 0 } : radialPositions[n.id];
+        return {
+            id: n.id,
+            label: n.label,
+            color: isCenter
+                ? { background: "#0f766e", border: "#ffffff" }
+                : n.is_case_entity
+                    ? { background: n.color, border: "#ffcc00" }
+                    : n.color,
+            borderWidth: isCenter ? 4 : n.is_case_entity ? 3 : 1,
+            size: isCenter ? 38 : Math.max(8, Math.min(n.size, 50)),
+            title: isCenter
+                ? (n.is_merged_center
+                    ? `Merged case center — ${(n.canonical_ids || []).length} case entities; underlying records are retained.`
+                    : `Case center — ${n.label}; recorded case role is not a finding.`)
+                : `${n.label} (${n.entity_type})${n.is_case_entity ? " — case entity" : ""}`,
+            ...(caseMode ? { x: position.x, y: position.y, fixed: { x: true, y: true } } : {}),
+        };
+    }));
+
+    const edgesDataset = new vis.DataSet(data.edges.map((e, index) => {
+        const relationship = e.rel_type || e.title || "";
+        const status = e.status || "data-derived";
+        const title = caseMode
+            ? [relationship, status === "ai_suggested"
+                ? "AI-suggested — not a confirmed link"
+                : status === "observed" ? "Observed" : "Data-derived"].filter(Boolean).join(" · ")
+            : e.title;
+        return {
+            ...(caseMode ? { id: `case-edge-${index}`, value: e.value ?? 1 } : {}),
+            from: e.from,
+            to: e.to,
+            title,
+            ...(caseMode ? { dashes: status === "ai_suggested" } : {
+                width: Math.max(0.5, Math.min(e.value, 5)),
+            }),
+            color: {
+                color: status === "ai_suggested" && caseMode ? "#c4b5fd" : "#333846",
+                highlight: "#4fd1c5",
+            },
+        };
+    }));
 
     const options = {
-        physics: {
+        physics: caseMode ? false : {
             stabilization: { iterations: 150 },
             barnesHut: { gravitationalConstant: -3000, springLength: 90, springConstant: 0.02 },
         },
         interaction: { hover: true, tooltipDelay: 150 },
         nodes: { shape: "dot", font: { color: "#e6e6e6", size: 11 } },
-        edges: { smooth: false },
+        edges: { smooth: false, scaling: { min: 1, max: 8 } },
     };
 
     const container = document.getElementById("network-container");
@@ -99,7 +143,7 @@ async function loadGraph() {
 async function loadCaseGraph(firId, hops) {
     const data = await fetchJSON(`/api/graph/case/${encodeURIComponent(firId)}?hops=${hops}`);
     document.getElementById("case-banner-text").textContent =
-        `Viewing case ${firId} — ${data.meta.seed_count} case entities`;
+        `Case ${firId} — ${data.meta.seed_count} case entities; AI suggestions, if present, are unconfirmed.`;
     renderGraph(data);
 }
 

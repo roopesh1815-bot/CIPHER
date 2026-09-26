@@ -76,7 +76,8 @@ async function selectCase(firId) {
 
     panel.innerHTML = `
         <h3>${firId}</h3>
-        <a class="view-graph-btn" href="/network-graph?case=${encodeURIComponent(firId)}">View in graph →</a>
+        <a class="view-graph-btn" href="/cases/${encodeURIComponent(firId)}/graph">Open case spider-web →</a>
+        <a class="view-graph-btn" href="/network-graph?case=${encodeURIComponent(firId)}">View in Network Graph →</a>
         <div class="detail-row"><strong>Crime type:</strong> ${s.Crime_Type || "—"}</div>
         <div class="detail-row"><strong>Location:</strong> ${s.Location || "—"}</div>
         <div class="detail-row"><strong>District:</strong> ${c.district || "—"}</div>

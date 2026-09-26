@@ -13,13 +13,69 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from api.security import get_current_user
 
 from core.db import fetch_all
-from core.spiderweb_center import build_spiderweb_center
+from core.spiderweb_center import build_spiderweb_center, case_edge_status
 
 router = APIRouter(prefix="/api/graph", tags=["graph"])
 
 GRAPH_JSON_PATH = Path("output/graph.json")
 
 _graph_cache: dict | None = None
+
+_ENTITY_TYPE_ALIASES = {
+    "phone": "mobile",
+    "celltower": "cell tower",
+    "socialhandle": "social handle",
+}
+
+
+def _normalized_entity_type(value: object) -> str:
+    entity_type = str(value or "").strip().casefold()
+    return _ENTITY_TYPE_ALIASES.get(entity_type, entity_type)
+
+
+def _case_entity_matches(
+    case_entities: list[dict], graph_nodes: list[dict]
+) -> tuple[dict[str, list[dict]], int]:
+    """Prefer an explicit stable ID; otherwise use unique exact label/type matches."""
+    nodes_by_id = {node["id"]: node for node in graph_nodes}
+    matches: dict[str, list[dict]] = {}
+    ambiguous = 0
+
+    for entity in case_entities:
+        canonical_id = entity.get("canonical_id") or entity.get("Canonical_ID") or entity.get("graph_node_id")
+        if canonical_id:
+            if str(canonical_id) in nodes_by_id:
+                matches.setdefault(str(canonical_id), []).append(entity)
+            continue
+
+        label = entity.get("entity_label")
+        if label is None:
+            continue
+        entity_type = _normalized_entity_type(entity.get("entity_type"))
+        candidates = [
+            node for node in graph_nodes
+            if node.get("label") == label
+            and (not entity_type or _normalized_entity_type(node.get("entity_type")) == entity_type)
+        ]
+        if len(candidates) == 1:
+            matches.setdefault(candidates[0]["id"], []).append(entity)
+        elif len(candidates) > 1:
+            ambiguous += 1
+
+    return matches, ambiguous
+
+
+def _case_edge_payload(edge: dict) -> dict:
+    provenance = edge.get("provenance", edge.get("source_file", edge.get("source", "")))
+    return {
+        "from": edge["source"],
+        "to": edge["target"],
+        "title": edge.get("rel_type", ""),
+        "rel_type": edge.get("rel_type", ""),
+        "value": edge.get("weight", 1),
+        "status": case_edge_status(edge),
+        "provenance": provenance,
+    }
 
 
 def _load_graph() -> dict:
@@ -117,8 +173,9 @@ def get_case_graph(
 ):
     """
     Case-scoped ego-graph: seeds from this case's case_entities (matched
-    to graph nodes by label), then expands `hops` steps outward through
-    the existing global graph. This is a lens on the same graph.json data
+    by stable ID when available, otherwise exact label and entity type),
+    then expands `hops` steps outward through the existing global graph.
+    This is a lens on the same graph.json data
     used by the main network graph page — not a separate graph build.
 
     Returns the same {nodes, edges, meta} shape as GET /api/graph, plus a
@@ -131,16 +188,15 @@ def get_case_graph(
     all_edges = data["edges"]
 
     case_entities = fetch_all(
-        "SELECT entity_label FROM case_entities WHERE fir_id = ?", (fir_id,)
+        "SELECT * FROM case_entities WHERE fir_id = ?", (fir_id,)
     )
     if not case_entities:
         raise HTTPException(status_code=404, detail=f"No entities found for case {fir_id}")
 
-    # Match case_entities rows to graph nodes by label — the graph's own
-    # ids (ACC-, PER-, etc.) aren't stored in case_entities, so label is
-    # the reliable join key available here.
-    labels = {e["entity_label"] for e in case_entities}
-    seed_ids = {n["id"] for n in data["nodes"] if n.get("label") in labels}
+    # Current case_entities rows have no canonical ID, so use a unique exact
+    # label/type fallback and skip ambiguous names instead of guessing.
+    matched_entities, ambiguous_matches = _case_entity_matches(case_entities, data["nodes"])
+    seed_ids = set(matched_entities)
 
     if not seed_ids:
         raise HTTPException(
@@ -164,26 +220,27 @@ def get_case_graph(
         visited |= next_frontier
         frontier = next_frontier
 
-    nodes = [all_nodes[nid] for nid in visited if nid in all_nodes]
+    nodes = [dict(all_nodes[nid]) for nid in visited if nid in all_nodes]
     node_ids = {n["id"] for n in nodes}
     edges = [e for e in all_edges if e["source"] in node_ids and e["target"] in node_ids]
 
-    # Mark which nodes are the case's own entities vs. expanded neighbours,
-    # so the frontend can visually distinguish "this case" from "context".
-        # Mark which nodes are the case's own entities vs. expanded neighbours,
-    # so the frontend can visually distinguish "this case" from "context".
     for n in nodes:
         n["is_case_entity"] = n["id"] in seed_ids
+        if n["id"] in matched_entities:
+            rows = matched_entities[n["id"]]
+            n["case_roles"] = list(dict.fromkeys(
+                str(row["role"]).strip() for row in rows if row.get("role")
+            ))
+            n["case_provenance"] = [
+                {
+                    "source": row.get("source"),
+                    "confidence_tier": row.get("confidence_tier"),
+                    "role": row.get("role"),
+                }
+                for row in rows
+            ]
 
-    vis_edges = [
-        {
-            "from": e["source"],
-            "to": e["target"],
-            "title": e.get("rel_type", ""),
-            "value": e.get("weight", 1),
-        }
-        for e in edges
-    ]
+    vis_edges = [_case_edge_payload(e) for e in edges]
 
     # Spider-web view: collapse multi-suspect seeds into one merged center,
     # rewire/dedupe edges. Falls back to the best-fused case entity if no
@@ -200,6 +257,8 @@ def get_case_graph(
         "meta": {
             "fir_id": fir_id,
             "seed_count": len(seed_ids),
+            "ambiguous_entity_matches": ambiguous_matches,
+            "entity_match_strategy": "canonical_id_or_exact_label_and_type",
             "hops": hops,
             "node_count": len(final_nodes),
             "edge_count": len(center_result.edges),

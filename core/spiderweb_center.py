@@ -28,22 +28,57 @@ Public entry point: build_spiderweb_center(nodes, edges)
 
 from __future__ import annotations
 from dataclasses import dataclass, field
-from typing import Optional
-
-
-FUSION_BADGE_RANK = {
-    "Triple-Verified": 3,
-    "Double-Verified": 2,
-    "Verified": 1,
-    None: 0,
-    "": 0,
-}
+import re
 
 CENTER_ROLE = "Suspect"  # role that qualifies a case entity as a center candidate
 
 
+def normalize_fusion_badge(value: object) -> str:
+    """Normalize user-facing fusion labels without changing their display value."""
+    words = re.sub(r"[^a-z]+", " ", str(value or "").casefold()).split()
+    for label in ("quad-verified", "triple-verified", "double-verified",
+                  "cross-verified", "single-source", "verified"):
+        expected = label.replace("-", " ").split()
+        if any(words[index:index + len(expected)] == expected for index in range(len(words))):
+            return label
+    return ""
+
+
+def fusion_badge_rank(value: object) -> int:
+    return {
+        "quad-verified": 4,
+        "triple-verified": 3,
+        "double-verified": 2,
+        "cross-verified": 2,
+        "verified": 1,
+    }.get(normalize_fusion_badge(value), 0)
+
+
+def case_edge_status(edge: dict) -> str:
+    """Return an explicit, neutral status for an existing graph edge."""
+    provenance = str(
+        edge.get("provenance") or edge.get("source_file") or edge.get("source") or ""
+    ).casefold().replace("-", "_").replace(" ", "_")
+    status = str(edge.get("status") or "").casefold().replace("-", "_")
+    suggested = (
+        edge.get("is_predicted") is True
+        or edge.get("is_ai_suggested") is True
+        or status in {"ai_suggested", "predicted", "suggested"}
+        or "ai_suggested" in provenance
+        or "predicted" in provenance
+    )
+    if suggested:
+        return "ai_suggested"
+    if status == "observed":
+        return "observed"
+    return "data-derived"
+
+
 def _roles(node: dict) -> list[str]:
-    return [r for r in (node.get("roles") or "").split("|") if r]
+    roles = node.get("case_roles", node.get("roles")) or ""
+    if isinstance(roles, str):
+        return [r.strip() for r in roles.split("|") if r.strip()]
+    return [str(role).strip() for role in roles if str(role).strip()]
 
 
 def _sources(node: dict) -> list[str]:
@@ -51,13 +86,13 @@ def _sources(node: dict) -> list[str]:
 
 
 def _fusion_rank(node: dict) -> int:
-    return FUSION_BADGE_RANK.get(node.get("fusion_badge"), 0)
+    return fusion_badge_rank(node.get("fusion_badge"))
 
 
 @dataclass
 class CenterResult:
     center_node: dict
-    edges: list[dict]                # rewired + deduped edges, ready for the frontend
+    edges: list[dict]                # rewired edges, ready for the frontend
     internal_links: list[dict]       # edges dropped because both ends merged into center
     center_reason: str               # "single_suspect" | "merged_suspects" | "fallback_no_suspect"
     merged_member_ids: list[str] = field(default_factory=list)
@@ -71,6 +106,7 @@ def _pick_fallback_center(case_nodes: list[dict]) -> dict:
             _fusion_rank(n),
             n.get("source_count", 0),
             n.get("fir_count", 0),
+            str(n.get("id", "")),
         )
     return max(case_nodes, key=score)
 
@@ -78,12 +114,23 @@ def _pick_fallback_center(case_nodes: list[dict]) -> dict:
 def _build_single_center(node: dict, reason: str) -> dict:
     center = dict(node)
     center["is_merged_center"] = False
+    center["is_case_center"] = True
     center["center_reason"] = reason
-    center["merged_members"] = [node]
+    center["canonical_ids"] = [node["id"]]
+    center["member_labels"] = [node.get("label", node["id"])]
+    center["merged_members"] = [dict(node)]
+    center["member_metadata"] = [{
+        "canonical_id": node["id"],
+        "label": node.get("label", node["id"]),
+        "roles": _roles(node),
+        "provenance": node.get("case_provenance", []),
+        "sources": _sources(node),
+    }]
     return center
 
 
 def _build_merged_center(members: list[dict]) -> dict:
+    members = sorted(members, key=lambda n: n["id"])
     ids_sorted = sorted(n["id"] for n in members)
     all_roles, all_sources = [], []
     for n in members:
@@ -99,11 +146,19 @@ def _build_merged_center(members: list[dict]) -> dict:
     if len(members) > 2:
         label += f" +{len(members) - 2} more"
 
+    member_metadata = [{
+        "canonical_id": n["id"],
+        "label": n.get("label", n["id"]),
+        "roles": _roles(n),
+        "provenance": n.get("case_provenance", []),
+        "sources": _sources(n),
+    } for n in members]
+
     return {
         "id": "center::" + "_".join(ids_sorted),
         "label": label,
         "entity_type": "MergedCenter",
-        "color": "#c0392b",  # distinct center color; adjust to match your palette
+        "color": "#0f766e",
         "size": max(n.get("size", 20) for n in members) + 10 * (len(members) - 1),
         "cross_verified": any(n.get("cross_verified") for n in members),
         "fusion_badge": best_fusion,
@@ -116,23 +171,24 @@ def _build_merged_center(members: list[dict]) -> dict:
         "last_seen": max((n.get("last_seen") for n in members if n.get("last_seen")), default=None),
         "is_case_entity": True,
         "is_merged_center": True,
+        "is_case_center": True,
         "center_reason": "merged_suspects",
-        "merged_members": members,
+        "canonical_ids": ids_sorted,
+        "member_labels": [n.get("label", n["id"]) for n in members],
+        "merged_members": [dict(n) for n in members],
+        "member_metadata": member_metadata,
     }
 
 
-def _rewire_and_dedupe_edges(
+def _rewire_edges(
     edges: list[dict], merged_ids: set[str], center_id: str
 ) -> tuple[list[dict], list[dict]]:
     """
-    Redirect any edge touching a merged member to the center id.
-    Edges where BOTH ends collapse to the center become 'internal_links'
-    (dropped from the graph, kept as the reason the merge happened).
-    Edges that collapse onto the same (center, other) pair after rewiring
-    are combined: value summed, titles merged into a reason list.
+    Redirect edges touching a merged member to the center id without
+    aggregating distinct evidence, relationship types, or edge values.
     """
     internal_links: list[dict] = []
-    combined: dict[tuple[str, str], dict] = {}
+    rewired: list[dict] = []
 
     for e in edges:
         frm = center_id if e["from"] in merged_ids else e["from"]
@@ -144,20 +200,11 @@ def _rewire_and_dedupe_edges(
         if frm == to:
             continue
 
-        key = tuple(sorted((frm, to)))
-        if key in combined:
-            existing = combined[key]
-            existing["value"] = round(existing.get("value", 0) + e.get("value", 0), 4)
-            reasons = existing.setdefault("reasons", [existing.get("title", "")])
-            if e.get("title") and e["title"] not in reasons:
-                reasons.append(e["title"])
-            existing["title"] = ", ".join(r for r in reasons if r)
-        else:
-            new_edge = dict(e)
-            new_edge["from"], new_edge["to"] = frm, to
-            combined[key] = new_edge
+        new_edge = dict(e)
+        new_edge["from"], new_edge["to"] = frm, to
+        rewired.append(new_edge)
 
-    return list(combined.values()), internal_links
+    return rewired, internal_links
 
 
 def build_spiderweb_center(nodes: list[dict], edges: list[dict]) -> CenterResult:
@@ -167,7 +214,10 @@ def build_spiderweb_center(nodes: list[dict], edges: list[dict]) -> CenterResult
             "No is_case_entity=True nodes in this case graph — cannot choose a center."
         )
 
-    suspects = [n for n in case_nodes if CENTER_ROLE in _roles(n)]
+    suspects = [
+        n for n in case_nodes
+        if any(role.casefold() == CENTER_ROLE.casefold() for role in _roles(n))
+    ]
 
     if len(suspects) == 0:
         fallback = _pick_fallback_center(case_nodes)
@@ -182,7 +232,7 @@ def build_spiderweb_center(nodes: list[dict], edges: list[dict]) -> CenterResult
         center = _build_merged_center(suspects)
         merged_ids = {n["id"] for n in suspects}
 
-    rewired_edges, internal_links = _rewire_and_dedupe_edges(
+    rewired_edges, internal_links = _rewire_edges(
         edges, merged_ids, center["id"]
     )
 

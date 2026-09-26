@@ -6,6 +6,8 @@ This directly addresses PS-26189: "data fragmented across multiple systems"
 
 import pandas as pd
 
+from core.spiderweb_center import normalize_fusion_badge
+
 
 BADGE_LEVELS = {
     4: "🔗 Quad-Verified",
@@ -21,7 +23,10 @@ def tag(entities_path: str) -> pd.DataFrame:
     # Assign badge level
     def badge(row):
         sc = int(row.get("Source_Count", 1))
-        return BADGE_LEVELS.get(sc, BADGE_LEVELS[1])
+        value = BADGE_LEVELS.get(sc, BADGE_LEVELS[1])
+        if not normalize_fusion_badge(value):
+            raise ValueError(f"Unsupported fusion badge: {value}")
+        return value
 
     df["Fusion_Badge"]   = df.apply(badge, axis=1)
     df["Is_CrossVerified"] = df["Source_Count"] >= 2
