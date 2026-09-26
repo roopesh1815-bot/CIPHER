@@ -92,7 +92,7 @@ function renderGraph(data) {
         const status = e.status || "data-derived";
         const title = caseMode
             ? [relationship, status === "ai_suggested"
-                ? "AI-suggested — not a confirmed link"
+                ? "Suggested relationship — unconfirmed analytical context"
                 : status === "observed" ? "Observed" : "Data-derived"].filter(Boolean).join(" · ")
             : e.title;
         return {

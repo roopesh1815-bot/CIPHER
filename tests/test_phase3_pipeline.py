@@ -250,7 +250,11 @@ class PipelineContractTests(unittest.TestCase):
         self.assertEqual(len(links), 1)
         self.assertEqual(links[0].node_a, "PER-1")
         self.assertEqual(links[0].shared_neighbors, ["Person C", "Account D"])
-        self.assertEqual(links[0].note, "AI-suggested — not a confirmed link")
+        self.assertEqual(
+            links[0].note,
+            "Graph-similarity suggested relationship — unconfirmed "
+            "(Jaccard/Adamic–Adar); requires investigator review",
+        )
 
     def test_pipeline_calls_existing_stages_in_order_and_uses_configured_paths(self):
         order = []

@@ -130,7 +130,7 @@ DEBUG = os.getenv("CIPHER_DEBUG", "false").lower() == "true"
 # don't drift into "criminal"/"guilty"/"confirmed" phrasing.
 NEUTRAL_TERMS = {
     "priority_score_label": "Priority score (for investigator review)",
-    "suggested_link_label": "AI-suggested link (unconfirmed)",
+    "suggested_link_label": "Graph-similarity suggestion (unconfirmed)",
     "suspect_status_label": "Reported / Alleged",
 }
 

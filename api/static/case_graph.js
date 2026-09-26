@@ -58,7 +58,7 @@ function showTooltip(lines) {
 
 function edgeStatusText(edge) {
   return edge.status === "ai_suggested"
-    ? "AI-suggested — not a confirmed link"
+    ? "Suggested relationship — unconfirmed analytical context"
     : edge.status === "observed"
       ? "Observed"
       : "Data-derived";

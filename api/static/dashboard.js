@@ -78,7 +78,7 @@ function appendContextRow(parent, label, value) {
 }
 
 function statusLabel(status) {
-  if (status === "ai_inference") return "AI-suggested — not a confirmed link";
+  if (status === "ai_inference") return "Analytical inference — unconfirmed";
   if (status === "investigator_confirmed") return "Investigator-reviewed case record";
   if (status === "observed_fact") return "Reported case context";
   return "Data-derived case context";
@@ -266,7 +266,7 @@ function renderSuggestions(result) {
       "/hidden-links",
       true
     ),
-    "No AI-suggested links are currently available."
+    "No graph-similarity suggestions are currently available."
   );
 }
 
@@ -297,7 +297,7 @@ function caseEdgeTitle(caseRecord) {
   const roleText = roles.length ? ` · Role recorded: ${roles.join(", ")}` : "";
   const status = caseEdgeStatus(caseRecord);
   const provenance = status === "ai_suggested"
-    ? "AI-suggested — not a confirmed link"
+    ? "Analytical inference — unconfirmed"
     : status === "reported" ? "Reported case context" : "Data-derived case context";
   const sources = [...new Set(records.map((record) => record.source).filter(Boolean))];
   const sourceText = sources.length ? ` · Source: ${sources.join(", ")}` : "";

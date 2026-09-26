@@ -1,4 +1,4 @@
-"""Hidden Links API: AI-suggested connections between entities that don't share a direct edge."""
+"""Hidden Links API: deterministic graph-similarity suggestions for unconnected pairs."""
 from __future__ import annotations
 
 import logging
@@ -17,6 +17,10 @@ logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/hidden-links", tags=["hidden_links"])
 
 HIDDEN_LINKS_PATH = LINK_PREDICTIONS_CSV
+HIDDEN_LINK_NOTE = (
+    "Graph-similarity suggested relationship — unconfirmed "
+    "(Jaccard/Adamic–Adar); requires investigator review"
+)
 
 
 class HiddenLink(BaseModel):
@@ -62,7 +66,7 @@ def _load_hidden_links() -> list[HiddenLink]:
                     row.get("Shared_Neighbor_Count", row.get("common_neighbors", len(shared)))
                 ),
                 shared_neighbors=shared,
-                note=str(row.get("Note", "AI-suggested — not a confirmed link")),
+                note=HIDDEN_LINK_NOTE,
             )
         )
     return links
