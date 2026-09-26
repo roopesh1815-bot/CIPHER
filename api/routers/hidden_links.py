@@ -5,9 +5,10 @@ import logging
 from typing import Optional
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
+from api.security import get_current_user
 from core.config import LINK_PREDICTIONS_CSV
 ...
 
@@ -69,6 +70,7 @@ def _load_hidden_links() -> list[HiddenLink]:
 
 @router.get("", response_model=list[HiddenLink])
 def list_hidden_links(
+    user: dict = Depends(get_current_user),
     entity_type: Optional[str] = Query(None, description="Filter: only links where either side matches this type"),
     min_score: Optional[float] = Query(None, description="Minimum Combined_Score"),
     search: Optional[str] = Query(None, description="Case-insensitive match on either label"),
@@ -91,7 +93,7 @@ def list_hidden_links(
 
 
 @router.get("/{link_id}", response_model=HiddenLink)
-def get_hidden_link(link_id: str):
+def get_hidden_link(link_id: str, user: dict = Depends(get_current_user)):
     for l in _load_hidden_links():
         if l.link_id == link_id:
             return l

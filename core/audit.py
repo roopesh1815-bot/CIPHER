@@ -7,6 +7,7 @@ go through log_action() rather than writing to audit_log directly.
 
 import hashlib
 import logging
+import sqlite3
 from datetime import datetime, timezone
 
 from core.db import fetch_one, fetch_all, execute
@@ -32,13 +33,24 @@ def _compute_hash(prev_hash: str, timestamp: str, username: str,
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def _get_last_hash() -> str:
+def _get_last_hash(connection: sqlite3.Connection | None = None) -> str:
     """Returns the entry_hash of the most recent audit_log row, or GENESIS_HASH if empty."""
+    if connection is not None:
+        last = connection.execute(
+            "SELECT entry_hash FROM audit_log ORDER BY id DESC LIMIT 1"
+        ).fetchone()
+        return last["entry_hash"] if last else GENESIS_HASH
     last = fetch_one("SELECT entry_hash FROM audit_log ORDER BY id DESC LIMIT 1")
     return last["entry_hash"] if last else GENESIS_HASH
 
 
-def log_action(username: str, action: str, target: str = "", details: str = "") -> int:
+def log_action(
+    username: str,
+    action: str,
+    target: str = "",
+    details: str = "",
+    connection: sqlite3.Connection | None = None,
+) -> int:
     """
     Append a tamper-evident entry to the audit log.
     Returns the new row's id.
@@ -49,8 +61,18 @@ def log_action(username: str, action: str, target: str = "", details: str = "") 
         log_action("admin", "ENTITY_CONFIRM", target="entity_id=1183", details="tier=investigator_confirmed")
     """
     timestamp = _now_iso()
-    prev_hash = _get_last_hash()
+    prev_hash = _get_last_hash(connection)
     entry_hash = _compute_hash(prev_hash, timestamp, username, action, target, details)
+
+    if connection is not None:
+        cursor = connection.execute(
+            """INSERT INTO audit_log (timestamp, username, action, target, details, prev_hash, entry_hash)
+               VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (timestamp, username, action, target, details, prev_hash, entry_hash),
+        )
+        row_id = cursor.lastrowid
+        logger.info(f"Audit: [{action}] by {username} -> {target}")
+        return row_id
 
     row_id = execute(
         """INSERT INTO audit_log (timestamp, username, action, target, details, prev_hash, entry_hash)

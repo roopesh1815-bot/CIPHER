@@ -11,6 +11,8 @@ from __future__ import annotations
 
 import json
 import logging
+import shutil
+import uuid
 from datetime import datetime, timezone
 from typing import Any
 
@@ -25,7 +27,7 @@ from core.config import (
     case_record_path,
     case_timeline_path,
 )
-from core.db import execute, fetch_all, fetch_one, get_connection
+from core.db import fetch_all, fetch_one, get_connection
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +61,15 @@ def create_case_folders(fir_id: str) -> None:
     (case_folder(fir_id) / "extracted").mkdir(parents=True, exist_ok=True)
 
 
+def _create_case_folders_at(folder: Any) -> None:
+    (folder / "documents" / "original").mkdir(parents=True, exist_ok=True)
+    (folder / "documents" / "scans").mkdir(parents=True, exist_ok=True)
+    (folder / "ocr_text").mkdir(parents=True, exist_ok=True)
+    (folder / "notes").mkdir(parents=True, exist_ok=True)
+    (folder / "evidence").mkdir(parents=True, exist_ok=True)
+    (folder / "extracted").mkdir(parents=True, exist_ok=True)
+
+
 def create_case(
     fir_id: str,
     fields: dict[str, Any],
@@ -87,30 +98,6 @@ def create_case(
         "SELECT 1 FROM users WHERE id = ? AND is_active = 1", (handler_user_id,)
     ) is None:
         raise ValueError("Active registering handler does not exist")
-    create_case_folders(fir_id)
-    folder_path = str(case_folder(fir_id))
-
-    with get_connection() as conn:
-        conn.execute(
-            """INSERT INTO cases (fir_id, crime_type, district, status, fir_date, folder_path)
-               VALUES (?, ?, ?, ?, ?, ?)""",
-            (
-                fir_id,
-                fields.get("crime_type") or fields.get("Crime_Type"),
-                fields.get("district") or fields.get("District"),
-                fields.get("status") or fields.get("Status") or "Open",
-                fields.get("fir_date") or fields.get("FIR_Date"),
-                folder_path,
-            ),
-        )
-        if handler_user_id is not None:
-            conn.execute(
-                """INSERT INTO case_memberships
-                       (fir_id, user_id, role, can_view, can_upload, active, added_by)
-                   VALUES (?, ?, 'handler', 1, 1, 1, ?)""",
-                (fir_id, handler_user_id, handler_user_id),
-            )
-
     record = {
         "fir_id": fir_id,
         "fields": fields,
@@ -118,15 +105,69 @@ def create_case(
         "created_at": _now_iso(),
         "updated_at": _now_iso(),
     }
-    case_record_path(fir_id).write_text(json.dumps(record, indent=2), encoding="utf-8")
+    final_folder = case_folder(fir_id)
+    if final_folder.exists():
+        raise FileExistsError(f"Case storage folder already exists without a case row: {fir_id}")
+    staging_folder = final_folder.parent / f".{fir_id}.{uuid.uuid4().hex}.tmp"
+    published_folder = False
+    try:
+        _create_case_folders_at(staging_folder)
+        (staging_folder / "case_record.json").write_text(
+            json.dumps(record, indent=2), encoding="utf-8"
+        )
+        (staging_folder / "timeline.json").write_text(
+            json.dumps([], indent=2), encoding="utf-8"
+        )
+        (staging_folder / "audit_log.jsonl").touch(exist_ok=True)
 
-    # Empty timeline and audit-log-per-case scaffolding, so downstream code
-    # (OCR review, notes, etc.) can always assume these files exist.
-    if not case_timeline_path(fir_id).exists():
-        case_timeline_path(fir_id).write_text(json.dumps([], indent=2), encoding="utf-8")
-    case_audit_log_path(fir_id).touch(exist_ok=True)
+        with get_connection() as conn:
+            conn.execute(
+                """INSERT INTO cases (fir_id, crime_type, district, status, fir_date, folder_path)
+                   VALUES (?, ?, ?, ?, ?, ?)""",
+                (
+                    fir_id,
+                    fields.get("crime_type") or fields.get("Crime_Type"),
+                    fields.get("district") or fields.get("District"),
+                    fields.get("status") or fields.get("Status") or "Open",
+                    fields.get("fir_date") or fields.get("FIR_Date"),
+                    str(final_folder),
+                ),
+            )
+            if handler_user_id is not None:
+                conn.execute(
+                    """INSERT INTO case_memberships
+                           (fir_id, user_id, role, can_view, can_upload, active, added_by)
+                       VALUES (?, ?, 'handler', 1, 1, 1, ?)""",
+                    (fir_id, handler_user_id, handler_user_id),
+                )
+            actor_id = handler_user_id if handler_user_id is not None else "unavailable"
+            log_action(
+                username,
+                "CASE_CREATE",
+                target=fir_id,
+                details=(
+                    f"actor_user_id={actor_id};"
+                    f"district={record['fields'].get('district') or record['fields'].get('District')}"
+                ),
+                connection=conn,
+            )
+            if handler_user_id is not None:
+                log_action(
+                    username,
+                    "CASE_HANDLER_ASSIGNED",
+                    target=fir_id,
+                    details=f"actor_user_id={handler_user_id};user_id={handler_user_id}",
+                    connection=conn,
+                )
+            staging_folder.rename(final_folder)
+            published_folder = True
+    except Exception:
+        if staging_folder.exists():
+            shutil.rmtree(staging_folder)
+        if published_folder and final_folder.exists():
+            shutil.rmtree(final_folder)
+        raise
 
-    log_action(username, "CASE_CREATE", target=fir_id, details=f"district={record['fields'].get('district') or record['fields'].get('District')}")
     logger.info("Case created: %s", fir_id)
     return True
 
@@ -158,23 +199,56 @@ def list_cases(status: str | None = None, limit: int = 100, offset: int = 0) -> 
     return fetch_all(query, tuple(params))
 
 
-def update_case_status(fir_id: str, new_status: str, username: str = "SYSTEM") -> None:
+def update_case_status(
+    fir_id: str,
+    new_status: str,
+    username: str = "SYSTEM",
+    actor_user_id: int | None = None,
+) -> None:
     """Update a case's status in both the DB and case_record.json."""
+    record_path = case_record_path(fir_id)
     if not case_exists(fir_id):
         raise ValueError(f"Case {fir_id} does not exist")
-
-    execute(
-        "UPDATE cases SET status = ?, updated_at = datetime('now') WHERE fir_id = ?",
-        (new_status, fir_id),
-    )
-
-    record_path = case_record_path(fir_id)
-    record = json.loads(record_path.read_text(encoding="utf-8")) if record_path.exists() else {}
+    old_content = record_path.read_bytes() if record_path.exists() else None
+    record = json.loads(old_content.decode("utf-8")) if old_content else {}
     record["status"] = new_status
     record["updated_at"] = _now_iso()
-    record_path.write_text(json.dumps(record, indent=2), encoding="utf-8")
-
-    log_action(username, "CASE_STATUS_UPDATE", target=fir_id, details=f"new_status={new_status}")
+    temp_path = record_path.with_name(f".{record_path.name}.{uuid.uuid4().hex}.tmp")
+    replaced_record = False
+    try:
+        temp_path.write_text(json.dumps(record, indent=2), encoding="utf-8")
+        with get_connection() as conn:
+            cursor = conn.execute(
+                "UPDATE cases SET status = ?, updated_at = datetime('now') WHERE fir_id = ?",
+                (new_status, fir_id),
+            )
+            if cursor.rowcount != 1:
+                raise ValueError(f"Case {fir_id} does not exist")
+            log_action(
+                username,
+                "CASE_STATUS_UPDATE",
+                target=fir_id,
+                details=(
+                    f"actor_user_id={actor_user_id or 'unavailable'};"
+                    f"new_status={new_status}"
+                ),
+                connection=conn,
+            )
+            temp_path.replace(record_path)
+            replaced_record = True
+    except Exception:
+        if temp_path.exists():
+            temp_path.unlink()
+        if replaced_record:
+            if old_content is None:
+                record_path.unlink(missing_ok=True)
+            else:
+                restore_path = record_path.with_name(
+                    f".{record_path.name}.{uuid.uuid4().hex}.restore"
+                )
+                restore_path.write_bytes(old_content)
+                restore_path.replace(record_path)
+        raise
     logger.info("Case %s status updated to %s", fir_id, new_status)
 
 
@@ -186,6 +260,7 @@ def add_case_entity(
     confidence_tier: str = "observed_fact",
     source: str | None = None,
     username: str = "SYSTEM",
+    actor_user_id: int | None = None,
 ) -> int:
     """
     Attach an entity to a case in case_entities. This is the link that
@@ -204,11 +279,25 @@ def add_case_entity(
     if confidence_tier not in VALID_CONFIDENCE_TIERS:
         raise ValueError(f"confidence_tier must be one of {VALID_CONFIDENCE_TIERS}, got {confidence_tier!r}")
 
-    row_id = execute(
-        """INSERT INTO case_entities (fir_id, entity_label, entity_type, role, confidence_tier, source)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (fir_id, entity_label, entity_type, role, confidence_tier, source),
-    )
+    with get_connection() as conn:
+        cursor = conn.execute(
+            """INSERT INTO case_entities (fir_id, entity_label, entity_type, role, confidence_tier, source)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (fir_id, entity_label, entity_type, role, confidence_tier, source),
+        )
+        row_id = cursor.lastrowid
+        log_action(
+            username,
+            "CASE_ENTITY_ADD",
+            target=f"{fir_id}:{row_id}",
+            details=(
+                f"actor_user_id={actor_user_id or 'unavailable'};"
+                f"case_id={fir_id};entity_id={row_id};"
+                f"entity_type={entity_type};role={role or 'unspecified'};"
+                f"confidence_tier={confidence_tier}"
+            ),
+            connection=conn,
+        )
     logger.debug("Entity attached to %s: %s (%s, role=%s)", fir_id, entity_label, entity_type, role)
     return row_id
 

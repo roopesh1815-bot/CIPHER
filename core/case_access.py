@@ -6,7 +6,7 @@ from fastapi import HTTPException
 
 from core.audit import log_action
 from core.config import validate_case_id
-from core.db import execute, fetch_all, fetch_one
+from core.db import fetch_all, fetch_one, get_connection
 
 CASE_REFERENCE_CONTEXT = "Potentially relevant information exists in another case."
 
@@ -76,18 +76,34 @@ def assign_case_member(
     if fetch_one("SELECT 1 FROM users WHERE id = ? AND is_active = 1", (user_id,)) is None:
         raise ValueError("Active user does not exist")
     can_upload = int(role == "handler")
-    execute(
-        """INSERT INTO case_memberships
-               (fir_id, user_id, role, can_view, can_upload, active, added_by)
-           VALUES (?, ?, ?, 1, ?, 1, ?)
-           ON CONFLICT(fir_id, user_id) DO UPDATE SET
-               role = excluded.role,
-               can_view = 1,
-               can_upload = excluded.can_upload,
-               active = 1,
-               added_by = excluded.added_by""",
-        (fir_id, user_id, role, can_upload, added_by),
-    )
+    actor_username = _username_for_audit(added_by)
+    with get_connection() as conn:
+        conn.execute(
+            """INSERT INTO case_memberships
+                   (fir_id, user_id, role, can_view, can_upload, active, added_by)
+               VALUES (?, ?, ?, 1, ?, 1, ?)
+               ON CONFLICT(fir_id, user_id) DO UPDATE SET
+                   role = excluded.role,
+                   can_view = 1,
+                   can_upload = excluded.can_upload,
+                   active = 1,
+                   added_by = excluded.added_by""",
+            (fir_id, user_id, role, can_upload, added_by),
+        )
+        log_action(
+            actor_username,
+            "CASE_MEMBER_ASSIGNED",
+            target=fir_id,
+            details=f"actor_user_id={added_by or 'unavailable'};user_id={user_id};role={role}",
+            connection=conn,
+        )
+
+
+def _username_for_audit(user_id: int | None) -> str:
+    if user_id is None:
+        return "SYSTEM"
+    user = fetch_one("SELECT username FROM users WHERE id = ?", (user_id,))
+    return user["username"] if user else "SYSTEM"
 
 
 def is_case_handler(fir_id: str, user: dict) -> bool:
@@ -103,28 +119,46 @@ def is_case_handler(fir_id: str, user: dict) -> bool:
     ) is not None
 
 
-def record_related_fir_reference(source_fir_id: str, referenced_fir_id: str) -> bool:
+def record_related_fir_reference(
+    source_fir_id: str,
+    referenced_fir_id: str,
+    username: str = "SYSTEM",
+    actor_user_id: int | None = None,
+) -> bool:
     """Index an existing FIR Related_FIR_ID without copying source-case content."""
     validate_case_id(source_fir_id)
     validate_case_id(referenced_fir_id)
     if source_fir_id == referenced_fir_id:
         return False
-    if fetch_one("SELECT 1 FROM cases WHERE fir_id = ?", (source_fir_id,)) is None:
-        return False
-    if fetch_one("SELECT 1 FROM cases WHERE fir_id = ?", (referenced_fir_id,)) is None:
-        return False
-    existing = fetch_one(
-        """SELECT 1 FROM case_references
-           WHERE source_fir_id = ? AND referenced_fir_id = ?
-             AND reference_type = 'related_fir'""",
-        (source_fir_id, referenced_fir_id),
-    )
-    if existing:
-        return False
-    execute(
-        """INSERT INTO case_references
-               (source_fir_id, referenced_fir_id, reference_type, provenance, context)
-           VALUES (?, ?, 'related_fir', 'FIR CSV Related_FIR_ID', ?)""",
-        (source_fir_id, referenced_fir_id, CASE_REFERENCE_CONTEXT),
-    )
+    actor_username = username
+    with get_connection() as conn:
+        if conn.execute("SELECT 1 FROM cases WHERE fir_id = ?", (source_fir_id,)).fetchone() is None:
+            return False
+        if conn.execute("SELECT 1 FROM cases WHERE fir_id = ?", (referenced_fir_id,)).fetchone() is None:
+            return False
+        existing = conn.execute(
+            """SELECT 1 FROM case_references
+               WHERE source_fir_id = ? AND referenced_fir_id = ?
+                 AND reference_type = 'related_fir'""",
+            (source_fir_id, referenced_fir_id),
+        ).fetchone()
+        if existing:
+            return False
+        cursor = conn.execute(
+            """INSERT INTO case_references
+                   (source_fir_id, referenced_fir_id, reference_type, provenance, context)
+               VALUES (?, ?, 'related_fir', 'FIR CSV Related_FIR_ID', ?)""",
+            (source_fir_id, referenced_fir_id, CASE_REFERENCE_CONTEXT),
+        )
+        log_action(
+            actor_username,
+            "CASE_REFERENCE_CREATE",
+            target=f"{source_fir_id}:{cursor.lastrowid}",
+            details=(
+                f"actor_user_id={actor_user_id or 'unavailable'};"
+                f"source_fir_id={source_fir_id};related_fir_id={referenced_fir_id};"
+                "reference_type=related_fir"
+            ),
+            connection=conn,
+        )
     return True

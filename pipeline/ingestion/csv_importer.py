@@ -158,7 +158,11 @@ def import_all(csv_path=FIR_CSV, username: str = "bulk_import") -> dict[str, int
         related_fir_id = _clean(row.get("Related_FIR_ID"))
         if fir_id and related_fir_id:
             try:
-                record_related_fir_reference(fir_id, related_fir_id)
+                record_related_fir_reference(
+                    fir_id,
+                    related_fir_id,
+                    username=username,
+                )
             except ValueError:
                 logger.warning("Skipping unsafe Related_FIR_ID on %s", fir_id)
 

@@ -6,17 +6,26 @@ Run with:  uvicorn api.main:app --reload
 import sys
 sys.path.insert(0, ".")
 
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse
 
 from core.db import init_db
 from core.case_access import require_case_access
 from core.config import validate_case_id
 from api.security import get_current_user
-from api.routers import auth as auth_router
-from api.routers import case_vault as case_vault_router
+from api.routers import (
+    alerts as alerts_router,
+    auth as auth_router,
+    case_vault as case_vault_router,
+    cases as cases_router,
+    communities as communities_router,
+    graph as graph_router,
+    hidden_links as hidden_links_router,
+    influencers as influencers_router,
+    risk as risk_router,
+)
 
 app = FastAPI(
     title="CIPHER — Criminal Network Analysis System",
@@ -29,6 +38,13 @@ templates = Jinja2Templates(directory="api/templates")
 
 app.include_router(auth_router.router)
 app.include_router(case_vault_router.router)
+app.include_router(graph_router.router)
+app.include_router(cases_router.router)
+app.include_router(influencers_router.router)
+app.include_router(risk_router.router)
+app.include_router(alerts_router.router)
+app.include_router(hidden_links_router.router)
+app.include_router(communities_router.router)
 
 
 @app.on_event("startup")
@@ -39,12 +55,11 @@ def on_startup():
 @app.get("/")
 def home(request: Request):
     """
-    Root route — checks the session cookie directly (rather than depending
-    on get_current_user, which would throw a 401 instead of redirecting).
+    Root route — uses the normal active-user check while preserving the login redirect.
     """
-    from api.security import decode_access_token, COOKIE_NAME
-    token = request.cookies.get(COOKIE_NAME)
-    if not token or decode_access_token(token) is None:
+    try:
+        get_current_user(request)
+    except HTTPException:
         return RedirectResponse(url="/login")
     return templates.TemplateResponse(request, "dashboard.html", {})
 
@@ -53,18 +68,10 @@ def home(request: Request):
 def health_check():
     return {"status": "ok", "service": "CIPHER API"}
 
-from api.routers import auth as auth_router, graph as graph_router
-# ...
-app.include_router(auth_router.router)
-app.include_router(graph_router.router)
 
 @app.get("/network-graph")
 def network_graph_page(request: Request, user: dict = Depends(get_current_user)):
     return templates.TemplateResponse(request, "network_graph.html", {})
-
-from api.routers import auth as auth_router, graph as graph_router, cases as cases_router
-# ...
-app.include_router(cases_router.router)
 
 @app.get("/cases")
 def case_manager_page(request: Request, user: dict = Depends(get_current_user)):
@@ -75,46 +82,30 @@ def case_manager_page(request: Request, user: dict = Depends(get_current_user)):
     )
 
 
-from api.routers import influencers
-app.include_router(influencers.router)
-
 @app.get("/key-influencers")
 def key_influencers_page(request: Request, user: dict = Depends(get_current_user)):
     return templates.TemplateResponse(request, "key_influencers.html", {})
 
-from api.routers import auth as auth_router, graph as graph_router, cases as cases_router, influencers as influencers_router, risk as risk_router
-# ...
-app.include_router(risk_router.router)
 
 @app.get("/risk-scoring")
 def risk_scoring_page(request: Request, user: dict = Depends(get_current_user)):
     return templates.TemplateResponse(request, "risk_scoring.html", {})
 
 
-from api.routers import alerts as alerts_router
-app.include_router(alerts_router.router)
-
-from api.routers import alerts as alerts_router
-app.include_router(alerts_router.router)
-
 @app.get("/alerts")
 def alerts_page(request: Request, user: dict = Depends(get_current_user)):
     return templates.TemplateResponse(request, "alerts.html", {})
 
-from api.routers import hidden_links as hidden_links_router
-app.include_router(hidden_links_router.router)
 
 @app.get("/hidden-links")
 def hidden_links_page(request: Request, user: dict = Depends(get_current_user)):
     return templates.TemplateResponse(request, "hidden_links.html", {})
 
 
-from api.routers import communities as communities_router
-app.include_router(communities_router.router)
-
 @app.get("/communities")
 def communities_page(request: Request, user: dict = Depends(get_current_user)):
     return templates.TemplateResponse(request, "communities.html", {})
+
 
 @app.get("/cases/{fir_id}/graph")
 def case_graph_page(fir_id: str, request: Request, user: dict = Depends(get_current_user)):

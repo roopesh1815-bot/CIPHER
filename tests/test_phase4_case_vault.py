@@ -77,6 +77,7 @@ class CaseVaultTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as error:
             require_case_access("FIR-2026-10001", self.requester)
         self.assertEqual(error.exception.status_code, 403)
+        self.assertTrue(user_can_access_case("FIR-2026-10001", self.admin))
 
     def test_related_fir_reference_is_minimal_and_does_not_add_entities(self):
         before_entities = db.fetch_all("SELECT * FROM case_entities")
@@ -116,7 +117,7 @@ class CaseVaultTests(unittest.TestCase):
         with self.assertRaises(HTTPException) as error:
             asyncio.run(
                 case_vault.upload_case_document(
-                    "FIR-2026-10001", file=upload, user=self.handler
+                    "FIR-2026-10001", file=upload, document_type="", source="", user=self.handler
                 )
             )
         self.assertEqual(error.exception.status_code, 415)
@@ -159,6 +160,9 @@ class CaseVaultTests(unittest.TestCase):
             self.handler,
         )
         grant_id = decision["grant_id"]
+        audit_events = db.fetch_all("SELECT target, details FROM audit_log")
+        audit_text = repr(audit_events)
+        self.assertNotIn(grant_id, audit_text)
         self.assertEqual(
             case_vault._grant_document_ids("FIR-2026-10001", self.requester),
             {document_id},
@@ -225,6 +229,158 @@ class CaseVaultTests(unittest.TestCase):
         self.assertEqual(
             db.fetch_one("SELECT status FROM case_access_requests WHERE id = ?", (request_id,))["status"],
             "PENDING",
+        )
+
+    def test_entity_and_reference_writes_roll_back_when_audit_fails(self):
+        with patch("core.case_manager.log_action", side_effect=RuntimeError("audit unavailable")):
+            with self.assertRaisesRegex(RuntimeError, "audit unavailable"):
+                from core.case_manager import add_case_entity
+                add_case_entity(
+                    "FIR-2026-10001",
+                    "Sensitive record label",
+                    "person",
+                    username="handler",
+                    actor_user_id=self.handler_id,
+                )
+        self.assertEqual(db.fetch_all("SELECT * FROM case_entities"), [])
+
+        with patch("core.case_access.log_action", side_effect=RuntimeError("audit unavailable")):
+            with self.assertRaisesRegex(RuntimeError, "audit unavailable"):
+                record_related_fir_reference(
+                    "FIR-2026-10002",
+                    "FIR-2026-10001",
+                    username="handler",
+                    actor_user_id=self.handler_id,
+                )
+        self.assertEqual(
+            db.fetch_all(
+                "SELECT * FROM case_references WHERE source_fir_id = 'FIR-2026-10002'"
+            ),
+            [],
+        )
+
+    def test_member_assignment_rolls_back_when_audit_fails(self):
+        with patch("core.case_access.log_action", side_effect=RuntimeError("audit unavailable")):
+            with self.assertRaisesRegex(RuntimeError, "audit unavailable"):
+                assign_case_member(
+                    "FIR-2026-10001", self.other_id, "investigator", self.handler_id
+                )
+        self.assertIsNone(
+            db.fetch_one(
+                """SELECT 1 FROM case_memberships
+                   WHERE fir_id = 'FIR-2026-10001' AND user_id = ?""",
+                (self.other_id,),
+            )
+        )
+
+    def test_document_and_access_request_writes_roll_back_on_audit_failure(self):
+        upload = UploadFile(filename="record.pdf", file=BytesIO(b"%PDF-1.7 protected"))
+        with patch("api.routers.case_vault.log_action", side_effect=RuntimeError("audit unavailable")):
+            with self.assertRaisesRegex(RuntimeError, "audit unavailable"):
+                asyncio.run(
+                    case_vault.upload_case_document(
+                        "FIR-2026-10001", file=upload, document_type="", source="", user=self.handler
+                    )
+                )
+        self.assertEqual(db.fetch_all("SELECT * FROM case_documents"), [])
+        self.assertEqual(
+            list(config.case_documents_original_dir("FIR-2026-10001").iterdir()),
+            [],
+        )
+
+        with patch("api.routers.case_vault.log_action", side_effect=RuntimeError("audit unavailable")):
+            with self.assertRaisesRegex(RuntimeError, "audit unavailable"):
+                case_vault.create_access_request(
+                    case_vault.AccessRequestBody(
+                        requesting_fir_id="FIR-2026-10002",
+                        source_fir_id="FIR-2026-10001",
+                        reason="Request source records for investigation",
+                    ),
+                    self.requester,
+                )
+        self.assertEqual(db.fetch_all("SELECT * FROM case_access_requests"), [])
+
+    def test_document_database_failure_removes_only_its_staged_upload(self):
+        upload = UploadFile(filename="record.pdf", file=BytesIO(b"%PDF-1.7 protected"))
+        with patch(
+            "api.routers.case_vault.get_connection",
+            side_effect=RuntimeError("database unavailable"),
+        ):
+            with self.assertRaisesRegex(RuntimeError, "database unavailable"):
+                asyncio.run(
+                    case_vault.upload_case_document(
+                        "FIR-2026-10001", file=upload, document_type="", source="", user=self.handler
+                    )
+                )
+        self.assertEqual(db.fetch_all("SELECT * FROM case_documents"), [])
+        self.assertEqual(
+            list(config.case_documents_original_dir("FIR-2026-10001").iterdir()),
+            [],
+        )
+
+    def test_document_filesystem_failure_rolls_back_document_metadata(self):
+        upload = UploadFile(filename="record.pdf", file=BytesIO(b"%PDF-1.7 protected"))
+        with patch("api.routers.case_vault.Path.rename", side_effect=OSError("filesystem unavailable")):
+            with self.assertRaisesRegex(OSError, "filesystem unavailable"):
+                asyncio.run(
+                    case_vault.upload_case_document(
+                        "FIR-2026-10001", file=upload, document_type="", source="", user=self.handler
+                    )
+                )
+        self.assertEqual(db.fetch_all("SELECT * FROM case_documents"), [])
+        self.assertEqual(
+            list(config.case_documents_original_dir("FIR-2026-10001").iterdir()),
+            [],
+        )
+
+    def test_approval_and_revocation_roll_back_when_audit_fails(self):
+        document_id = self._add_document()
+        request_id = case_vault.create_access_request(
+            case_vault.AccessRequestBody(
+                requesting_fir_id="FIR-2026-10002",
+                source_fir_id="FIR-2026-10001",
+                reason="Request source records for investigation",
+            ),
+            self.requester,
+        )["request_id"]
+        with patch("api.routers.case_vault.log_action", side_effect=RuntimeError("audit unavailable")):
+            with self.assertRaisesRegex(RuntimeError, "audit unavailable"):
+                case_vault.decide_access_request(
+                    request_id,
+                    case_vault.AccessDecision(decision="approve", document_ids=[document_id]),
+                    self.handler,
+                )
+        self.assertEqual(
+            db.fetch_one(
+                "SELECT status FROM case_access_requests WHERE id = ?", (request_id,)
+            )["status"],
+            "PENDING",
+        )
+        self.assertIsNone(
+            db.fetch_one("SELECT 1 FROM case_access_grants WHERE request_id = ?", (request_id,))
+        )
+
+        case_vault.decide_access_request(
+            request_id,
+            case_vault.AccessDecision(decision="approve", document_ids=[document_id]),
+            self.handler,
+        )
+        grant = db.fetch_one(
+            "SELECT * FROM case_access_grants WHERE request_id = ?", (request_id,)
+        )
+        with patch("api.routers.case_vault.log_action", side_effect=RuntimeError("audit unavailable")):
+            with self.assertRaisesRegex(RuntimeError, "audit unavailable"):
+                case_vault.revoke_access_grant(grant["id"], self.handler)
+        self.assertIsNone(
+            db.fetch_one(
+                "SELECT revoked_at FROM case_access_grants WHERE id = ?", (grant["id"],)
+            )["revoked_at"]
+        )
+        self.assertEqual(
+            db.fetch_one(
+                "SELECT status FROM case_access_requests WHERE id = ?", (request_id,)
+            )["status"],
+            "APPROVED",
         )
 
 

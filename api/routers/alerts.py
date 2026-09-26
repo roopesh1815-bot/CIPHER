@@ -6,9 +6,10 @@ from pathlib import Path
 from typing import Literal, Optional
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
+from api.security import get_current_user
 from core.config import ANOMALIES_CSV, TEMPORAL_ALERTS_CSV # adjust if your config module names this differently
 
 logger = logging.getLogger(__name__)
@@ -94,6 +95,7 @@ def _load_all_alerts() -> list[Alert]:
 
 @router.get("", response_model=list[Alert])
 def list_alerts(
+    user: dict = Depends(get_current_user),
     type: Optional[AlertType] = Query(None, description="Filter: anomaly or temporal_burst"),
     severity: Optional[Severity] = Query(None, description="Filter: Low, Medium, High, Critical"),
     search: Optional[str] = Query(None, description="Case-insensitive match on entity label or detail"),
@@ -118,7 +120,7 @@ def list_alerts(
 
 
 @router.get("/{alert_id}", response_model=Alert)
-def get_alert(alert_id: str):
+def get_alert(alert_id: str, user: dict = Depends(get_current_user)):
     for a in _load_all_alerts():
         if a.alert_id == alert_id:
             return a

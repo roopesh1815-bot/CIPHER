@@ -5,9 +5,10 @@ import logging
 from typing import Optional
 
 import pandas as pd
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
+from api.security import get_current_user
 from core.config import COMMUNITIES_CSV
 
 logger = logging.getLogger(__name__)
@@ -63,6 +64,7 @@ def _row_to_summary(row) -> CommunitySummary:
 
 @router.get("", response_model=list[CommunitySummary])
 def list_communities(
+    user: dict = Depends(get_current_user),
     dominant_type: Optional[str] = Query(None, description="Filter: e.g. Account, Person, Vehicle"),
     has_suspect: Optional[bool] = Query(None, description="Filter: only communities containing a suspect"),
     min_size: Optional[int] = Query(None, description="Minimum member count"),
@@ -83,7 +85,7 @@ def list_communities(
 
 
 @router.get("/{community_id}", response_model=CommunityDetail)
-def get_community(community_id: int):
+def get_community(community_id: int, user: dict = Depends(get_current_user)):
     df = _load_communities_df()
     match = df[df["Community_ID"] == community_id]
     if match.empty:

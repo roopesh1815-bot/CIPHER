@@ -7,15 +7,24 @@ GET  /login              -> renders the login page
 """
 
 from fastapi import APIRouter, Depends, Form, HTTPException, Request, status
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+import logging
 
-from core.auth import authenticate
-from api.security import create_access_token, get_current_user, COOKIE_NAME, TOKEN_EXPIRE_MINUTES
+from api.security import (
+    COOKIE_NAME,
+    TOKEN_EXPIRE_MINUTES,
+    create_access_token,
+    decode_access_token,
+    get_current_user,
+)
+from core.audit import log_action
+from core.auth import authenticate, get_user_by_username
 
 router = APIRouter()
 templates = Jinja2Templates(directory="api/templates")
+logger = logging.getLogger(__name__)
 
 
 class LoginRequest(BaseModel):
@@ -68,7 +77,27 @@ def browser_login(request: Request, username: str = Form(...), password: str = F
 
 
 @router.get("/auth/logout", tags=["auth"])
-def logout():
+def logout(request: Request):
+    token = request.cookies.get(COOKIE_NAME)
+    payload = decode_access_token(token) if token else None
+    if payload and payload.get("sub"):
+        user = get_user_by_username(payload["sub"])
+        if user:
+            try:
+                log_action(
+                    user["username"],
+                    "LOGOUT",
+                    target=user["username"],
+                    details=f"actor_user_id={user.get('id', 'unavailable')}",
+                )
+            except Exception:
+                logger.exception("Failed to audit logout for user_id=%s", user.get("id"))
+                response = JSONResponse(
+                    status_code=503,
+                    content={"detail": "Logout audit failed; session cookie cleared"},
+                )
+                response.delete_cookie(COOKIE_NAME)
+                return response
     response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie(COOKIE_NAME)
     return response

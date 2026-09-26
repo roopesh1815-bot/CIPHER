@@ -33,7 +33,7 @@ from core.config import (
     case_folder,
     validate_case_id,
 )
-from core.db import execute, fetch_all, fetch_one, get_connection
+from core.db import fetch_all, fetch_one, get_connection
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api", tags=["case vault"])
@@ -122,7 +122,7 @@ def _validate_file(path: Path, extension: str) -> None:
 
 def _grant_document_ids(fir_id: str, user: dict) -> set[int]:
     rows = fetch_all(
-        """SELECT g.id, g.scope_json, g.expires_at, g.expired_at
+        """SELECT g.id, g.request_id, g.scope_json, g.expires_at, g.expired_at
            FROM case_access_grants g
            JOIN case_access_requests r ON r.id = g.request_id
            JOIN case_memberships m
@@ -136,24 +136,31 @@ def _grant_document_ids(fir_id: str, user: dict) -> set[int]:
     )
     allowed: set[int] = set()
     now = datetime.now(timezone.utc)
+    expired: list[tuple[str, str]] = []
     for grant in rows:
         expires_at = datetime.fromisoformat(grant["expires_at"])
         if expires_at <= now:
             if not grant.get("expired_at"):
-                timestamp = now.isoformat()
-                execute(
-                    "UPDATE case_access_grants SET expired_at = ? WHERE id = ? AND expired_at IS NULL",
-                    (timestamp, grant["id"]),
-                )
-                log_action(
-                    _username(user),
-                    "CASE_ACCESS_GRANT_EXPIRED",
-                    target=grant["id"],
-                    details=f"source_fir_id={fir_id}",
-                )
+                expired.append((grant["id"], grant["request_id"]))
             continue
         scope = json.loads(grant["scope_json"])
         allowed.update(int(doc_id) for doc_id in scope.get("document_ids", []))
+    if expired:
+        with get_connection() as conn:
+            for grant_id, request_id in expired:
+                cursor = conn.execute(
+                    """UPDATE case_access_grants SET expired_at = ?
+                       WHERE id = ? AND expired_at IS NULL AND revoked_at IS NULL""",
+                    (now.isoformat(), grant_id),
+                )
+                if cursor.rowcount:
+                    log_action(
+                        _username(user),
+                        "CASE_ACCESS_GRANT_EXPIRED",
+                        target=request_id,
+                        details=f"actor_user_id={user.get('id', 'unavailable')};source_fir_id={fir_id}",
+                        connection=conn,
+                    )
     return allowed
 
 
@@ -183,7 +190,6 @@ def register_case(body: CaseRegistration, user: dict = Depends(get_current_user)
         raise HTTPException(status_code=422, detail=str(error)) from error
     if not created:
         raise HTTPException(status_code=409, detail="Case already exists")
-    log_action(_username(user), "CASE_HANDLER_ASSIGNED", target=body.fir_id)
     return {"fir_id": body.fir_id, "status": "created"}
 
 
@@ -197,12 +203,6 @@ def add_case_member(
         assign_case_member(fir_id, body.user_id, body.role, user["id"])
     except ValueError as error:
         raise HTTPException(status_code=404, detail=str(error)) from error
-    log_action(
-        _username(user),
-        "CASE_MEMBER_ASSIGNED",
-        target=fir_id,
-        details=f"user_id={body.user_id};role={body.role}",
-    )
     return {"fir_id": fir_id, "user_id": body.user_id, "role": body.role}
 
 
@@ -234,6 +234,9 @@ async def upload_case_document(
     temp_path = destination_dir / f".upload-{token}.tmp"
     storage_name = f"{token}{extension}"
     final_path = destination_dir / storage_name
+    if final_path.exists():
+        raise HTTPException(status_code=409, detail="Generated storage name collision")
+    published_file = False
     digest = hashlib.sha256()
     size = 0
     try:
@@ -247,38 +250,46 @@ async def upload_case_document(
         if size == 0:
             raise HTTPException(status_code=400, detail="Empty documents are not accepted")
         _validate_file(temp_path, extension)
-        temp_path.replace(final_path)
         relative_path = final_path.relative_to(case_folder(fir_id)).as_posix()
-        document_id = execute(
-            """INSERT INTO case_documents
-                   (fir_id, file_name, file_path, file_type, uploaded_by,
-                    ocr_status, size_bytes, sha256, source, document_type)
-               VALUES (?, ?, ?, ?, ?, 'unavailable', ?, ?, ?, ?)""",
-            (
-                fir_id,
-                supplied_name[:255],
-                relative_path,
-                extension.lstrip("."),
+        with get_connection() as conn:
+            cursor = conn.execute(
+                """INSERT INTO case_documents
+                       (fir_id, file_name, file_path, file_type, uploaded_by,
+                        ocr_status, size_bytes, sha256, source, document_type)
+                   VALUES (?, ?, ?, ?, ?, 'unavailable', ?, ?, ?, ?)""",
+                (
+                    fir_id,
+                    supplied_name[:255],
+                    relative_path,
+                    extension.lstrip("."),
+                    _username(user),
+                    size,
+                    digest.hexdigest(),
+                    source[:500],
+                    document_type[:100],
+                ),
+            )
+            document_id = cursor.lastrowid
+            log_action(
                 _username(user),
-                size,
-                digest.hexdigest(),
-                source[:500],
-                document_type[:100],
-            ),
-        )
+                "CASE_DOCUMENT_UPLOAD",
+                target=f"{fir_id}:{document_id}",
+                details=(
+                    f"actor_user_id={user.get('id', 'unavailable')};"
+                    f"size_bytes={size};sha256={digest.hexdigest()}"
+                ),
+                connection=conn,
+            )
+            temp_path.rename(final_path)
+            published_file = True
     except Exception:
         temp_path.unlink(missing_ok=True)
-        final_path.unlink(missing_ok=True)
+        if published_file:
+            final_path.unlink(missing_ok=True)
         raise
     finally:
         await file.close()
 
-    log_action(
-        _username(user),
-        "CASE_DOCUMENT_UPLOAD",
-        target=f"{fir_id}:{document_id}",
-        details=f"size_bytes={size};sha256={digest.hexdigest()}",
-    )
     return {
         "id": document_id,
         "file_name": supplied_name[:255],
@@ -306,7 +317,10 @@ def list_case_documents(fir_id: str, user: dict = Depends(get_current_user)):
             _username(user),
             "CASE_DOCUMENT_LIST",
             target=fir_id,
-            details=f"document_count={len(rows)};access=membership",
+            details=(
+                f"actor_user_id={user.get('id', 'unavailable')};"
+                f"document_count={len(rows)};access=membership"
+            ),
         )
         return {
             "documents": rows,
@@ -326,7 +340,10 @@ def list_case_documents(fir_id: str, user: dict = Depends(get_current_user)):
         _username(user),
         "CASE_DOCUMENT_LIST",
         target=fir_id,
-        details=f"document_count={len(rows)};access=scoped_grant",
+        details=(
+            f"actor_user_id={user.get('id', 'unavailable')};"
+            f"document_count={len(rows)};access=scoped_grant"
+        ),
     )
     return {"documents": rows, "can_upload": False}
 
@@ -354,6 +371,7 @@ def download_case_document(
         _username(user),
         "CASE_DOCUMENT_ACCESS",
         target=f"{fir_id}:{document_id}",
+        details=f"actor_user_id={user.get('id', 'unavailable')};status=authorized",
     )
     return FileResponse(
         path,
@@ -374,6 +392,16 @@ def list_case_references(fir_id: str, user: dict = Depends(get_current_user)):
            ORDER BY id""",
         (fir_id, fir_id),
     )
+    if references:
+        log_action(
+            _username(user),
+            "CASE_REFERENCE_DISCOVER",
+            target=fir_id,
+            details=(
+                f"actor_user_id={user.get('id', 'unavailable')};"
+                f"reference_count={len(references)};status=authorized"
+            ),
+        )
     return {
         "references": [
             {
@@ -424,41 +452,58 @@ def create_access_request(
     request_id = uuid.uuid4().hex
     now = datetime.now(timezone.utc)
     expires = now + timedelta(days=ACCESS_REQUEST_LIFETIME_DAYS)
-    execute(
-        """INSERT INTO case_access_requests
-               (id, requester_user_id, requesting_fir_id, source_fir_id,
-                requested_scope, reason, status, created_at, expires_at)
-           VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?, ?)""",
-        (
-            request_id,
-            user["id"],
-            body.requesting_fir_id,
-            body.source_fir_id,
-            json.dumps({"type": body.requested_scope}),
-            body.reason,
-            now.isoformat(),
-            expires.isoformat(),
-        ),
-    )
-    log_action(
-        _username(user),
-        "CASE_ACCESS_REQUEST",
-        target=request_id,
-        details=f"requesting_fir_id={body.requesting_fir_id};source_fir_id={body.source_fir_id}",
-    )
+    with get_connection() as conn:
+        conn.execute(
+            """INSERT INTO case_access_requests
+                   (id, requester_user_id, requesting_fir_id, source_fir_id,
+                    requested_scope, reason, status, created_at, expires_at)
+               VALUES (?, ?, ?, ?, ?, ?, 'PENDING', ?, ?)""",
+            (
+                request_id,
+                user["id"],
+                body.requesting_fir_id,
+                body.source_fir_id,
+                json.dumps({"type": body.requested_scope}),
+                body.reason,
+                now.isoformat(),
+                expires.isoformat(),
+            ),
+        )
+        log_action(
+            _username(user),
+            "CASE_ACCESS_REQUEST",
+            target=request_id,
+            details=(
+                f"actor_user_id={user.get('id', 'unavailable')};"
+                f"requesting_fir_id={body.requesting_fir_id};"
+                f"source_fir_id={body.source_fir_id};status=PENDING"
+            ),
+            connection=conn,
+        )
     return {"request_id": request_id, "status": "PENDING", "expires_at": expires.isoformat()}
 
 
-def _expire_pending_requests(rows: list[dict], actor: str) -> None:
+def _expire_pending_requests(rows: list[dict], actor: dict) -> None:
     now = datetime.now(timezone.utc)
     for row in rows:
         if row["status"] == "PENDING" and datetime.fromisoformat(row["expires_at"]) <= now:
-            execute(
-                "UPDATE case_access_requests SET status = 'EXPIRED' WHERE id = ? AND status = 'PENDING'",
-                (row["id"],),
-            )
-            log_action(actor, "CASE_ACCESS_REQUEST_EXPIRED", target=row["id"])
-            row["status"] = "EXPIRED"
+            with get_connection() as conn:
+                cursor = conn.execute(
+                    "UPDATE case_access_requests SET status = 'EXPIRED' WHERE id = ? AND status = 'PENDING'",
+                    (row["id"],),
+                )
+                if cursor.rowcount:
+                    log_action(
+                        _username(actor),
+                        "CASE_ACCESS_REQUEST_EXPIRED",
+                        target=row["id"],
+                        details=(
+                            f"actor_user_id={actor.get('id', 'unavailable')};"
+                            "status=EXPIRED"
+                        ),
+                        connection=conn,
+                    )
+                    row["status"] = "EXPIRED"
 
 
 @router.get("/case-access/requests")
@@ -501,7 +546,7 @@ def list_access_requests(
                    LEFT JOIN case_access_grants g ON g.request_id = r.id
                    ORDER BY r.created_at DESC"""
             )
-        _expire_pending_requests(rows, _username(user))
+        _expire_pending_requests(rows, user)
         for row in rows:
             row["documents"] = (
                 fetch_all(
@@ -513,7 +558,7 @@ def list_access_requests(
                 else []
             )
     if role == "outbox":
-        _expire_pending_requests(rows, _username(user))
+        _expire_pending_requests(rows, user)
     return {"requests": rows}
 
 
@@ -541,11 +586,19 @@ def decide_access_request(
         raise HTTPException(status_code=409, detail="Request is no longer pending")
     now = datetime.now(timezone.utc)
     if datetime.fromisoformat(request["expires_at"]) <= now:
-        execute(
-            "UPDATE case_access_requests SET status = 'EXPIRED' WHERE id = ? AND status = 'PENDING'",
-            (request_id,),
-        )
-        log_action(_username(user), "CASE_ACCESS_REQUEST_EXPIRED", target=request_id)
+        with get_connection() as conn:
+            cursor = conn.execute(
+                "UPDATE case_access_requests SET status = 'EXPIRED' WHERE id = ? AND status = 'PENDING'",
+                (request_id,),
+            )
+            if cursor.rowcount:
+                log_action(
+                    _username(user),
+                    "CASE_ACCESS_REQUEST_EXPIRED",
+                    target=request_id,
+                    details=f"actor_user_id={user.get('id', 'unavailable')};status=EXPIRED",
+                    connection=conn,
+                )
         raise HTTPException(status_code=410, detail="Access request has expired")
 
     grant_id = None
@@ -599,14 +652,19 @@ def decide_access_request(
                     user["id"],
                 ),
             )
-
-    action = "CASE_ACCESS_APPROVED" if body.decision == "approve" else "CASE_ACCESS_REJECTED"
-    log_action(
-        _username(user),
-        action,
-        target=request_id,
-        details=f"grant_id={grant_id or ''};notes={body.notes or ''}",
-    )
+        action = "CASE_ACCESS_APPROVED" if body.decision == "approve" else "CASE_ACCESS_REJECTED"
+        log_action(
+            _username(user),
+            action,
+            target=request_id,
+            details=(
+                f"actor_user_id={user.get('id', 'unavailable')};"
+                f"source_fir_id={request['source_fir_id']};"
+                f"document_count={len(body.document_ids) if body.decision == 'approve' else 0};"
+                f"status={body.decision.upper()}"
+            ),
+            connection=conn,
+        )
     return {"request_id": request_id, "status": body.decision.upper(), "grant_id": grant_id}
 
 
@@ -620,14 +678,26 @@ def revoke_access_grant(grant_id: str, user: dict = Depends(get_current_user)):
     if grant["revoked_at"]:
         raise HTTPException(status_code=409, detail="Access grant is already revoked")
     timestamp = datetime.now(timezone.utc).isoformat()
-    execute(
-        "UPDATE case_access_grants SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL",
-        (timestamp, grant_id),
-    )
-    execute(
-        """UPDATE case_access_requests SET status = 'REVOKED'
-           WHERE id = ? AND status = 'APPROVED'""",
-        (grant["request_id"],),
-    )
-    log_action(_username(user), "CASE_ACCESS_REVOKED", target=grant_id)
+    with get_connection() as conn:
+        cursor = conn.execute(
+            "UPDATE case_access_grants SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL",
+            (timestamp, grant_id),
+        )
+        if cursor.rowcount != 1:
+            raise HTTPException(status_code=409, detail="Access grant is already revoked")
+        conn.execute(
+            """UPDATE case_access_requests SET status = 'REVOKED'
+               WHERE id = ? AND status = 'APPROVED'""",
+            (grant["request_id"],),
+        )
+        log_action(
+            _username(user),
+            "CASE_ACCESS_REVOKED",
+            target=grant["request_id"],
+            details=(
+                f"actor_user_id={user.get('id', 'unavailable')};"
+                f"source_fir_id={grant['source_fir_id']};status=REVOKED"
+            ),
+            connection=conn,
+        )
     return {"grant_id": grant_id, "status": "REVOKED"}
