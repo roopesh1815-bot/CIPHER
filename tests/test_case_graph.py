@@ -40,6 +40,7 @@ class CaseGraphTests(unittest.TestCase):
         with (
             patch.object(graph, "_load_graph", return_value=graph_data),
             patch.object(graph, "fetch_all", return_value=entities),
+            patch.object(graph, "require_case_access"),
         ):
             response = graph.get_case_graph(
                 "FIR-2026-TEST", user={"username": "investigator"}, hops=hops

@@ -19,6 +19,20 @@
 
     <main class="cases-page">
         <aside class="cases-controls">
+            <h2>Register a case</h2>
+            <form id="case-registration-form" class="case-form">
+                <label for="new-fir-id">FIR / case ID</label>
+                <input id="new-fir-id" name="fir_id" required maxlength="64">
+                <label for="new-crime-type">Crime type</label>
+                <input id="new-crime-type" name="crime_type">
+                <label for="new-district">District</label>
+                <input id="new-district" name="district">
+                <label for="new-fir-date">FIR date</label>
+                <input id="new-fir-date" name="fir_date" type="date">
+                <button type="submit">Register case</button>
+            </form>
+            <p id="case-action-status" class="case-action-status" role="status"></p>
+
             <h2>Filters</h2>
 
             <label for="risk-tier-filter">Risk tier</label>
@@ -58,6 +72,15 @@
         </aside>
     </main>
 
+    <section class="case-workflow">
+        <h2>Cross-case access requests</h2>
+        <p>References indicate potentially relevant information only. Access requires approval by the source case handler.</p>
+        <div id="access-request-list"></div>
+    </section>
+
+    <script>
+        window.CIPHER_IS_ADMIN = {{ is_admin | tojson }};
+    </script>
     <script src="/static/cases.js"></script>
 </body>
 </html>

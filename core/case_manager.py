@@ -25,7 +25,7 @@ from core.config import (
     case_record_path,
     case_timeline_path,
 )
-from core.db import execute, fetch_all, fetch_one
+from core.db import execute, fetch_all, fetch_one, get_connection
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +63,7 @@ def create_case(
     fir_id: str,
     fields: dict[str, Any],
     username: str = "SYSTEM",
+    handler_user_id: int | None = None,
 ) -> bool:
     """
     Create a new case: folder structure, case_record.json, `cases` DB row.
@@ -81,21 +82,34 @@ def create_case(
         logger.info("Case %s already exists, skipping creation.", fir_id)
         return False
 
+    case_folder(fir_id)
+    if handler_user_id is not None and fetch_one(
+        "SELECT 1 FROM users WHERE id = ? AND is_active = 1", (handler_user_id,)
+    ) is None:
+        raise ValueError("Active registering handler does not exist")
     create_case_folders(fir_id)
     folder_path = str(case_folder(fir_id))
 
-    execute(
-        """INSERT INTO cases (fir_id, crime_type, district, status, fir_date, folder_path)
-           VALUES (?, ?, ?, ?, ?, ?)""",
-        (
-            fir_id,
-            fields.get("crime_type") or fields.get("Crime_Type"),
-            fields.get("district") or fields.get("District"),
-            fields.get("status") or fields.get("Status") or "Open",
-            fields.get("fir_date") or fields.get("FIR_Date"),
-            folder_path,
-        ),
-    )
+    with get_connection() as conn:
+        conn.execute(
+            """INSERT INTO cases (fir_id, crime_type, district, status, fir_date, folder_path)
+               VALUES (?, ?, ?, ?, ?, ?)""",
+            (
+                fir_id,
+                fields.get("crime_type") or fields.get("Crime_Type"),
+                fields.get("district") or fields.get("District"),
+                fields.get("status") or fields.get("Status") or "Open",
+                fields.get("fir_date") or fields.get("FIR_Date"),
+                folder_path,
+            ),
+        )
+        if handler_user_id is not None:
+            conn.execute(
+                """INSERT INTO case_memberships
+                       (fir_id, user_id, role, can_view, can_upload, active, added_by)
+                   VALUES (?, ?, 'handler', 1, 1, 1, ?)""",
+                (fir_id, handler_user_id, handler_user_id),
+            )
 
     record = {
         "fir_id": fir_id,

@@ -8,13 +8,13 @@ produced by pipeline/intelligence/case_summariser.py) merged with the
 import csv
 import json
 import logging
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.security import get_current_user
 from core.artifact_cache import FileArtifactCache
-from core.config import CASE_SUMMARIES_JSON, ENTITIES_CSV
+from core.case_access import accessible_case_ids, require_case_access
+from core.config import CASE_SUMMARIES_JSON, ENTITIES_CSV, case_record_path, validate_case_id
 from core.db import fetch_all, fetch_one
 
 logger = logging.getLogger(__name__)
@@ -96,10 +96,14 @@ def list_cases(
     """
     summaries = _load_summaries()
     db_rows = {row["fir_id"]: row for row in fetch_all("SELECT * FROM cases")}
+    allowed_cases = accessible_case_ids(user)
 
     merged = []
-    for fir_id, summary in summaries.items():
+    for fir_id in sorted(set(summaries) | set(db_rows)):
+        if fir_id not in allowed_cases:
+            continue
         db_row = db_rows.get(fir_id, {})
+        summary = summaries.get(fir_id, {})
 
         if risk_tier and summary.get("Lead_Risk_Tier", "").lower() != risk_tier.lower():
             continue
@@ -115,9 +119,9 @@ def list_cases(
         merged.append(
             {
                 "fir_id": fir_id,
-                "crime_type": summary.get("Crime_Type"),
+                "crime_type": summary.get("Crime_Type") or db_row.get("crime_type"),
                 "location": summary.get("Location"),
-                "date": summary.get("Date"),
+                "date": summary.get("Date") or db_row.get("fir_date"),
                 "status": db_row.get("status", "Unknown"),
                 "district": db_row.get("district"),
                 "risk_score": summary.get("Lead_Risk_Score"),
@@ -168,6 +172,7 @@ def get_entity_cases(
             detail=f"Case associations for entity {canonical_id} are ambiguous by label and type",
         )
 
+    allowed_cases = accessible_case_ids(user)
     records = fetch_all(
         """SELECT c.fir_id, c.crime_type, c.district, c.status, c.fir_date,
                   ce.entity_label, ce.entity_type, ce.role,
@@ -178,6 +183,7 @@ def get_entity_cases(
     matching_records = [
         record
         for record in records
+        if record.get("fir_id") in allowed_cases
         if str(record.get("entity_label") or "").casefold() == entity_label.casefold()
         and _normalize_entity_type(record.get("entity_type")) == entity_type
     ]
@@ -224,19 +230,22 @@ def get_case_detail(fir_id: str, user: dict = Depends(get_current_user)):
     """Full detail for one case: DB row, case_record.json fields, full
     narrative, and every entity attached via case_entities — the last of
     these is what a future case-scoped graph view will seed from."""
+    try:
+        validate_case_id(fir_id)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
     db_row = fetch_one("SELECT * FROM cases WHERE fir_id = ?", (fir_id,))
     if db_row is None:
         raise HTTPException(status_code=404, detail=f"Case {fir_id} not found")
+    require_case_access(fir_id, user)
 
     summaries = _load_summaries()
     summary = summaries.get(fir_id, {})
 
     record = {}
-    folder_path = db_row.get("folder_path")
-    if folder_path:
-        record_path = Path(folder_path) / "case_record.json"
-        if record_path.exists():
-            record = json.loads(record_path.read_text(encoding="utf-8"))
+    record_path = case_record_path(fir_id)
+    if record_path.exists():
+        record = json.loads(record_path.read_text(encoding="utf-8"))
 
     entities = fetch_all(
         "SELECT * FROM case_entities WHERE fir_id = ? ORDER BY role, entity_type", (fir_id,)

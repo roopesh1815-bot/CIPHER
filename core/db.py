@@ -56,7 +56,11 @@ CREATE TABLE IF NOT EXISTS case_documents (
     file_type     TEXT,
     uploaded_by   TEXT,
     uploaded_at   TEXT NOT NULL DEFAULT (datetime('now')),
-    ocr_status    TEXT DEFAULT 'pending'
+    ocr_status    TEXT DEFAULT 'pending',
+    size_bytes    INTEGER,
+    sha256        TEXT,
+    source        TEXT,
+    document_type TEXT
 );
 
 CREATE TABLE IF NOT EXISTS case_entities (
@@ -75,6 +79,63 @@ CREATE TABLE IF NOT EXISTS case_entities (
 CREATE INDEX IF NOT EXISTS idx_audit_username ON audit_log(username);
 CREATE INDEX IF NOT EXISTS idx_case_documents_fir ON case_documents(fir_id);
 CREATE INDEX IF NOT EXISTS idx_case_entities_fir ON case_entities(fir_id);
+
+CREATE TABLE IF NOT EXISTS case_memberships (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    fir_id      TEXT NOT NULL REFERENCES cases(fir_id) ON DELETE CASCADE,
+    user_id     INTEGER NOT NULL REFERENCES users(id),
+    role        TEXT NOT NULL CHECK (role IN ('handler', 'investigator')),
+    can_view    INTEGER NOT NULL DEFAULT 1,
+    can_upload  INTEGER NOT NULL DEFAULT 0,
+    active      INTEGER NOT NULL DEFAULT 1,
+    added_by    INTEGER REFERENCES users(id),
+    created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (fir_id, user_id)
+);
+
+CREATE TABLE IF NOT EXISTS case_references (
+    id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+    source_fir_id       TEXT NOT NULL REFERENCES cases(fir_id) ON DELETE CASCADE,
+    referenced_fir_id   TEXT NOT NULL REFERENCES cases(fir_id) ON DELETE CASCADE,
+    reference_type      TEXT NOT NULL,
+    provenance          TEXT NOT NULL,
+    context             TEXT NOT NULL,
+    created_at          TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (source_fir_id, referenced_fir_id, reference_type)
+);
+
+CREATE TABLE IF NOT EXISTS case_access_requests (
+    id                  TEXT PRIMARY KEY,
+    requester_user_id   INTEGER NOT NULL REFERENCES users(id),
+    requesting_fir_id   TEXT NOT NULL REFERENCES cases(fir_id),
+    source_fir_id       TEXT NOT NULL REFERENCES cases(fir_id),
+    requested_scope     TEXT NOT NULL,
+    reason              TEXT NOT NULL,
+    status              TEXT NOT NULL CHECK (status IN ('PENDING', 'APPROVED', 'REJECTED', 'EXPIRED', 'REVOKED')),
+    created_at          TEXT NOT NULL,
+    expires_at          TEXT NOT NULL,
+    decision_user_id    INTEGER REFERENCES users(id),
+    decision_at         TEXT,
+    decision_notes      TEXT
+);
+
+CREATE TABLE IF NOT EXISTS case_access_grants (
+    id                  TEXT PRIMARY KEY,
+    request_id          TEXT NOT NULL UNIQUE REFERENCES case_access_requests(id),
+    requester_user_id   INTEGER NOT NULL REFERENCES users(id),
+    source_fir_id       TEXT NOT NULL REFERENCES cases(fir_id),
+    scope_json          TEXT NOT NULL,
+    issued_at           TEXT NOT NULL,
+    expires_at          TEXT NOT NULL,
+    revoked_at          TEXT,
+    expired_at          TEXT,
+    approved_by         INTEGER NOT NULL REFERENCES users(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_case_memberships_user ON case_memberships(user_id, active);
+CREATE INDEX IF NOT EXISTS idx_case_references_source ON case_references(source_fir_id);
+CREATE INDEX IF NOT EXISTS idx_case_references_target ON case_references(referenced_fir_id);
+CREATE INDEX IF NOT EXISTS idx_access_requests_source ON case_access_requests(source_fir_id, status);
 """
 
 
@@ -102,9 +163,28 @@ def get_connection():
 
 
 def init_db() -> None:
-    """Create all tables/indexes if they don't already exist. Safe to call repeatedly."""
+    """Create tables and apply additive upgrades without replacing existing data."""
     with get_connection() as conn:
         conn.executescript(SCHEMA)
+        document_columns = {
+            row["name"] for row in conn.execute("PRAGMA table_info(case_documents)")
+        }
+        additive_columns = {
+            "size_bytes": "INTEGER",
+            "sha256": "TEXT",
+            "source": "TEXT",
+            "document_type": "TEXT",
+        }
+        for name, column_type in additive_columns.items():
+            if name not in document_columns:
+                conn.execute(
+                    f"ALTER TABLE case_documents ADD COLUMN {name} {column_type}"
+                )
+        grant_columns = {
+            row["name"] for row in conn.execute("PRAGMA table_info(case_access_grants)")
+        }
+        if "expired_at" not in grant_columns:
+            conn.execute("ALTER TABLE case_access_grants ADD COLUMN expired_at TEXT")
     logger.info(f"Database initialised at {DB_PATH}")
 
 

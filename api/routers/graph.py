@@ -14,6 +14,8 @@ from api.security import get_current_user
 from core.artifact_cache import FileArtifactCache
 from core.config import GRAPH_JSON
 from core.db import fetch_all
+from core.case_access import require_case_access
+from core.config import validate_case_id
 from core.spiderweb_center import build_spiderweb_center, case_edge_status
 
 router = APIRouter(prefix="/api/graph", tags=["graph"])
@@ -196,6 +198,11 @@ def get_case_graph(
     actually found in the graph (some case_entities — e.g. locations —
     may not exist as graph nodes, which is expected, not an error).
     """
+    try:
+        validate_case_id(fir_id)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    require_case_access(fir_id, user)
     data = _load_graph()
     all_nodes = {n["id"]: n for n in data["nodes"]}
     all_edges = data["edges"]

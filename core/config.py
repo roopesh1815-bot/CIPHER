@@ -9,6 +9,7 @@ works correctly regardless of the current working directory it's run from
 """
 
 import os
+import re
 from pathlib import Path
 
 try:
@@ -65,9 +66,26 @@ DB_PATH = DB_DIR / "cipher.db"
 DB_BACKUP_DIR = DB_DIR / "backups"
 
 # ---- case folders -----------------------------------------------------------
+CASE_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$")
+
+
+def validate_case_id(fir_id: str) -> str:
+    """Validate a case identifier as one safe path component."""
+    if not isinstance(fir_id, str) or not CASE_ID_PATTERN.fullmatch(fir_id):
+        raise ValueError("Invalid case identifier")
+    return fir_id
+
+
 def case_folder(fir_id: str) -> Path:
     """Return the per-case folder path for a given FIR_ID, e.g. FIR-2026-00001."""
-    return CASES_DIR / fir_id
+    validate_case_id(fir_id)
+    root = CASES_DIR.resolve()
+    folder = (root / fir_id).resolve()
+    try:
+        folder.relative_to(root)
+    except ValueError as error:
+        raise ValueError("Case folder escapes the configured case storage root") from error
+    return folder
 
 def case_record_path(fir_id: str) -> Path:
     return case_folder(fir_id) / "case_record.json"
@@ -93,6 +111,8 @@ def case_audit_log_path(fir_id: str) -> Path:
 # ---- upload / OCR safety limits (F5) -----------------------------------------
 ALLOWED_UPLOAD_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png", ".txt", ".docx"}
 MAX_UPLOAD_SIZE_MB = 20
+ACCESS_GRANT_LIFETIME_MINUTES = 30
+ACCESS_REQUEST_LIFETIME_DAYS = 7
 
 # ---- auth / audit (Phase 3) --------------------------------------------------
 ROLE_INVESTIGATOR = "Field Investigator"

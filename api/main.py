@@ -6,14 +6,17 @@ Run with:  uvicorn api.main:app --reload
 import sys
 sys.path.insert(0, ".")
 
-from fastapi import FastAPI, Request, Depends
+from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
 
 from core.db import init_db
+from core.case_access import require_case_access
+from core.config import validate_case_id
 from api.security import get_current_user
 from api.routers import auth as auth_router
+from api.routers import case_vault as case_vault_router
 
 app = FastAPI(
     title="CIPHER — Criminal Network Analysis System",
@@ -25,6 +28,7 @@ app.mount("/static", StaticFiles(directory="api/static"), name="static")
 templates = Jinja2Templates(directory="api/templates")
 
 app.include_router(auth_router.router)
+app.include_router(case_vault_router.router)
 
 
 @app.on_event("startup")
@@ -64,7 +68,11 @@ app.include_router(cases_router.router)
 
 @app.get("/cases")
 def case_manager_page(request: Request, user: dict = Depends(get_current_user)):
-    return templates.TemplateResponse(request, "case_manager.html", {})
+    return templates.TemplateResponse(
+        request,
+        "case_manager.html",
+        {"is_admin": user.get("role") == "Admin"},
+    )
 
 
 from api.routers import influencers
@@ -110,4 +118,9 @@ def communities_page(request: Request, user: dict = Depends(get_current_user)):
 
 @app.get("/cases/{fir_id}/graph")
 def case_graph_page(fir_id: str, request: Request, user: dict = Depends(get_current_user)):
+    try:
+        validate_case_id(fir_id)
+    except ValueError as error:
+        raise HTTPException(status_code=422, detail=str(error)) from error
+    require_case_access(fir_id, user)
     return templates.TemplateResponse(request, "case_graph.html", {"fir_id": fir_id})

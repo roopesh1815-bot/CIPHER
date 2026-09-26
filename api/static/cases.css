@@ -69,3 +69,20 @@
 .view-graph-btn:hover {
     background: rgba(79, 209, 197, 0.22);
 }
+
+.case-form { margin-bottom: 1.5rem; }
+.case-action-status { min-height: 1.2rem; margin: 0.4rem 0 1rem; color: #9aa1ac; font-size: 0.78rem; }
+.case-workflow { padding: 1.2rem 1.5rem; background: #1a1d27; border-top: 1px solid #262a36; }
+.case-workflow h2 { color: #4fd1c5; font-size: 1rem; margin-bottom: 0.4rem; }
+.case-workflow p { color: #9aa1ac; font-size: 0.8rem; margin-bottom: 0.8rem; }
+.case-documents, .case-references, .request-item { margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid #333846; }
+.case-documents h4, .case-references h4 { margin-bottom: 0.4rem; color: #4fd1c5; }
+.case-action-row { display: flex; align-items: center; flex-wrap: wrap; gap: 0.4rem; margin: 0.35rem 0; color: #c0c4cc; }
+.case-action-row button, .case-action-row a {
+    padding: 0.35rem 0.55rem; border-radius: 5px; border: 1px solid #333846;
+    background: #252a36; color: #4fd1c5; cursor: pointer; text-decoration: none;
+    font-size: 0.75rem;
+}
+.request-item { color: #c0c4cc; font-size: 0.8rem; }
+.request-item label { display: block; margin: 0.3rem 0; }
+.request-item input[type="checkbox"] { margin-right: 0.4rem; }

@@ -20,6 +20,7 @@ from typing import Any
 import pandas as pd
 
 from core.case_manager import add_case_entity, create_case
+from core.case_access import record_related_fir_reference
 from core.config import FIR_CSV
 
 logger = logging.getLogger(__name__)
@@ -146,9 +147,20 @@ def import_all(csv_path=FIR_CSV, username: str = "bulk_import") -> dict[str, int
         created, entities_added = import_row(row, username=username)
         if created:
             summary["cases_created"] += 1
-            summary["entities_added"] += entities_added
         else:
             summary["cases_skipped_existing"] += 1
+        summary["entities_added"] += entities_added
+
+    # Index only source-declared Related_FIR_ID values whose two case records
+    # exist; never synthesize entity-to-entity relationships from this field.
+    for _, row in df.iterrows():
+        fir_id = _clean(row.get("FIR_ID"))
+        related_fir_id = _clean(row.get("Related_FIR_ID"))
+        if fir_id and related_fir_id:
+            try:
+                record_related_fir_reference(fir_id, related_fir_id)
+            except ValueError:
+                logger.warning("Skipping unsafe Related_FIR_ID on %s", fir_id)
 
     logger.info("Import complete: %s", summary)
     return summary
