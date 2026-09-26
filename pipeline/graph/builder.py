@@ -6,7 +6,6 @@ Nodes = entities, Edges = relationships between them
 
 import pandas as pd
 import networkx as nx
-from collections import defaultdict
 
 
 def build_graph(entities_path: str, fir_path: str,
@@ -49,23 +48,37 @@ def build_graph(entities_path: str, fir_path: str,
     def get_cid(val):
         return val_to_cid.get(str(val).strip().title()) or val_to_cid.get(str(val).strip())
 
-    def add_edge(a, b, rel_type, weight=1.0, source="FIR", date=""):
+    related_firs = []
+
+    def add_edge(a, b, rel_type, weight=1.0, source="FIR", date="", event_id=None):
         if a and b and a != b and G.has_node(a) and G.has_node(b):
+            event = {"rel_type": rel_type, "source": source}
+            if date and str(date).strip().casefold() not in {"nan", "none"}:
+                event["date"] = str(date)
+            if event_id and str(event_id).strip().casefold() not in {"nan", "none"}:
+                event["source_event_id"] = str(event_id)
             if G.has_edge(a, b):
                 G[a][b]["weight"]   += weight
                 G[a][b]["sources"]   = G[a][b].get("sources","") + "|" + source
+                G[a][b]["events"].append(event)
+                if rel_type not in G[a][b]["rel_types"]:
+                    G[a][b]["rel_types"].append(rel_type)
             else:
                 G.add_edge(a, b,
                     rel_type = rel_type,
                     weight   = weight,
                     source   = source,
                     date     = date,
+                    sources  = source,
+                    rel_types = [rel_type],
+                    events   = [event],
                 )
 
     # ── 2. FIR-based edges ────────────────────────────────────
     fir = pd.read_csv(fir_path)
     for _, row in fir.iterrows():
         date = str(row.get("Incident_Date", ""))
+        fir_id = row.get("FIR_ID")
 
         def fir_cid(col_name, col_mob=None):
             name = str(row.get(col_name, "NULL")).strip().title()
@@ -93,36 +106,39 @@ def build_graph(entities_path: str, fir_path: str,
         acc_cid  = get_cid(acc)  if acc  not in ("NULL","nan","") else None
 
         # Person ↔ Person edges
-        add_edge(comp_cid, vic_cid,   "Complainant-Victim",    2.0, "FIR", date)
-        add_edge(comp_cid, susp_cid,  "Reported-Suspect",      3.0, "FIR", date)
-        add_edge(susp_cid, assoc_cid, "Suspect-Associate",     3.5, "FIR", date)
-        add_edge(susp_cid, wit_cid,   "Suspect-Witness",       1.5, "FIR", date)
-        add_edge(vic_cid,  susp_cid,  "Victim-Suspect",        3.0, "FIR", date)
-        add_edge(assoc_cid,wit_cid,   "Associate-Witness",     1.0, "FIR", date)
+        add_edge(comp_cid, vic_cid,   "Complainant-Victim",    2.0, "FIR", date, fir_id)
+        add_edge(comp_cid, susp_cid,  "Reported-Suspect",      3.0, "FIR", date, fir_id)
+        add_edge(susp_cid, assoc_cid, "Suspect-Associate",     3.5, "FIR", date, fir_id)
+        add_edge(susp_cid, wit_cid,   "Suspect-Witness",       1.5, "FIR", date, fir_id)
+        add_edge(vic_cid,  susp_cid,  "Victim-Suspect",        3.0, "FIR", date, fir_id)
+        add_edge(assoc_cid,wit_cid,   "Associate-Witness",     1.0, "FIR", date, fir_id)
 
         # Person ↔ Location
         for person_cid in [susp_cid, vic_cid, comp_cid]:
-            add_edge(person_cid, loc_cid, "Located-At", 1.0, "FIR", date)
+            add_edge(person_cid, loc_cid, "Located-At", 1.0, "FIR", date, fir_id)
 
         # Person ↔ Vehicle
-        add_edge(susp_cid,  veh_cid, "Used-Vehicle",    2.0, "FIR", date)
-        add_edge(assoc_cid, veh_cid, "Used-Vehicle",    1.5, "FIR", date)
+        add_edge(susp_cid,  veh_cid, "Used-Vehicle",    2.0, "FIR", date, fir_id)
+        add_edge(assoc_cid, veh_cid, "Used-Vehicle",    1.5, "FIR", date, fir_id)
 
         # Person ↔ Account
-        add_edge(susp_cid, acc_cid, "Linked-Account",   2.5, "FIR", date)
-        add_edge(vic_cid,  acc_cid, "Victim-Account",   1.5, "FIR", date)
+        add_edge(susp_cid, acc_cid, "Linked-Account",   2.5, "FIR", date, fir_id)
+        add_edge(vic_cid,  acc_cid, "Victim-Account",   1.5, "FIR", date, fir_id)
 
-        # Related FIR link (FIR ↔ FIR via shared entities)
         rid = str(row.get("Related_FIR_ID","NULL")).strip()
-        if rid not in ("NULL","nan",""):
-            # We link the suspect of this FIR to the suspect of related FIR
-            # (handled via shared mobile — already resolved in entity_resolver)
-            pass
+        if rid.casefold() not in ("null", "nan", "none", ""):
+            related_firs.append({
+                "fir_id": str(fir_id),
+                "related_fir_id": rid,
+            })
+
+    G.graph["related_firs"] = related_firs
 
     # ── 3. CDR-based edges (Mobile ↔ Mobile) ─────────────────
     cdr = pd.read_csv(cdr_path)
     for _, row in cdr.iterrows():
-        date    = str(row.get("Call_DateTime",""))[:10]
+        date    = str(row.get("Call_DateTime",""))
+        cdr_id  = row.get("CDR_ID")
         caller  = str(row.get("Caller_Mobile","")).strip()
         callee  = str(row.get("Callee_Mobile","")).strip()
         dur     = int(row.get("Duration_Sec", 0))
@@ -135,12 +151,13 @@ def build_graph(entities_path: str, fir_path: str,
 
         a = get_cid(caller)
         b = get_cid(callee)
-        add_edge(a, b, "Called", w, "CDR", date)
+        add_edge(a, b, "Called", w, "CDR", date, cdr_id)
 
     # ── 4. Financial-based edges (Account ↔ Account) ─────────
     fin = pd.read_csv(fin_path)
     for _, row in fin.iterrows():
-        date   = str(row.get("Transaction_DateTime",""))[:10]
+        date   = str(row.get("Transaction_DateTime",""))
+        txn_id = row.get("TXN_ID")
         sender = str(row.get("Sender_Account","")).strip()
         recvr  = str(row.get("Receiver_Account","")).strip()
         amt    = float(row.get("Amount_INR", 0))
@@ -152,14 +169,14 @@ def build_graph(entities_path: str, fir_path: str,
 
         a = get_cid(sender)
         b = get_cid(recvr)
-        add_edge(a, b, "Transferred-To", w, "Financial", date)
+        add_edge(a, b, "Transferred-To", w, "Financial", date, txn_id)
 
         # Mobile ↔ Account
         mob = str(row.get("Mobile_Ref","NULL")).strip()
         if mob not in ("NULL","nan",""):
             m_cid = get_cid(mob)
             a_cid = get_cid(sender)
-            add_edge(m_cid, a_cid, "Mobile-Account", 1.0, "Financial", date)
+            add_edge(m_cid, a_cid, "Mobile-Account", 1.0, "Financial", date, txn_id)
 
     # ── 5. Remove self-loops and isolates ─────────────────────
     G.remove_edges_from(nx.selfloop_edges(G))

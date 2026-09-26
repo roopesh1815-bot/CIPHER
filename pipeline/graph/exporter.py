@@ -6,6 +6,7 @@ Exports NetworkX graph to JSON (for dashboard) and GEXF (for Gephi)
 import json
 import networkx as nx
 import pandas as pd
+from core.config import GRAPH_GEXF, GRAPH_JSON, RELATIONSHIPS_CSV
 
 
 def export_json(G: nx.Graph, out_path: str):
@@ -47,9 +48,13 @@ def export_json(G: nx.Graph, out_path: str):
             "weight":   round(data.get("weight", 1.0), 2),
             "source_file": data.get("source", ""),
             "date":     data.get("date", ""),
+            "sources":  data.get("sources", data.get("source", "")),
+            "rel_types": data.get("rel_types", [data.get("rel_type", "")]),
+            "events":   data.get("events", []),
         })
 
     graph_json = {"nodes": nodes, "edges": edges,
+                  "related_firs": G.graph.get("related_firs", []),
                   "meta": {"node_count": len(nodes), "edge_count": len(edges)}}
 
     with open(out_path, "w", encoding="utf-8") as f:
@@ -60,7 +65,13 @@ def export_json(G: nx.Graph, out_path: str):
 
 
 def export_gexf(G: nx.Graph, out_path: str):
-    nx.write_gexf(G, out_path)
+    export_graph = G.copy()
+    export_graph.graph.pop("related_firs", None)
+    for _, _, data in export_graph.edges(data=True):
+        for attribute in ("events", "rel_types"):
+            if attribute in data:
+                data[attribute] = json.dumps(data[attribute], ensure_ascii=False)
+    nx.write_gexf(export_graph, out_path)
     print(f"  Exported GEXF (Gephi) → {out_path}")
 
 
@@ -80,6 +91,11 @@ def export_relationships_csv(G: nx.Graph, out_path: str):
             "Weight":         round(data.get("weight", 1.0), 2),
             "Source":         data.get("source", ""),
             "Date":           data.get("date", ""),
+            "Sources":        data.get("sources", data.get("source", "")),
+            "Relationship_Types": json.dumps(
+                data.get("rel_types", [data.get("rel_type", "")]), ensure_ascii=False
+            ),
+            "Events":          json.dumps(data.get("events", []), ensure_ascii=False),
         })
     df = pd.DataFrame(records)
     df.to_csv(out_path, index=False)
@@ -98,6 +114,6 @@ if __name__ == "__main__":
         "data/raw/cdr_logs.csv",
         "data/raw/financial_txns.csv",
     )
-    export_json(G, "data/processed/graph.json")
-    export_gexf(G, "output/graph_export.gexf")
-    export_relationships_csv(G, "data/processed/relationships.csv")
+    export_json(G, str(GRAPH_JSON))
+    export_gexf(G, str(GRAPH_GEXF))
+    export_relationships_csv(G, str(RELATIONSHIPS_CSV))

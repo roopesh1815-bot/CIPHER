@@ -10,25 +10,26 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.security import get_current_user
+from core.artifact_cache import FileArtifactCache
 from core.config import RISK_SCORES_JSON
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/risk", tags=["risk"])
 
-_risk_cache: list[dict] | None = None
+_risk_cache: FileArtifactCache[list[dict]] = FileArtifactCache()
 
 
 def _load_risk_scores() -> list[dict]:
-    global _risk_cache
-    if _risk_cache is None:
-        if not RISK_SCORES_JSON.exists():
-            raise HTTPException(
-                status_code=404,
-                detail="risk_scores.json not found — run run_pipeline.py first",
-            )
-        with open(RISK_SCORES_JSON, encoding="utf-8") as f:
-            _risk_cache = json.load(f)
-    return _risk_cache
+    try:
+        return _risk_cache.load(
+            RISK_SCORES_JSON,
+            lambda path: json.loads(path.read_text(encoding="utf-8")),
+        )
+    except FileNotFoundError as error:
+        raise HTTPException(
+            status_code=404,
+            detail="risk_scores.json not found — run run_pipeline.py first",
+        ) from error
 
 
 @router.get("")

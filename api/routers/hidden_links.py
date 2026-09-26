@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import Optional
 
 import pandas as pd
@@ -42,22 +41,27 @@ def _load_hidden_links() -> list[HiddenLink]:
     df = pd.read_csv(HIDDEN_LINKS_PATH)
     links: list[HiddenLink] = []
     for i, row in df.iterrows():
-        shared = str(row["Shared_Neighbors"]).split("|") if pd.notna(row["Shared_Neighbors"]) else []
+        node_a = row.get("Node_A", row.get("node_a"))
+        node_b = row.get("Node_B", row.get("node_b"))
+        shared_value = row.get("Shared_Neighbors", row.get("shared_neighbors", ""))
+        shared = str(shared_value).split("|") if pd.notna(shared_value) and str(shared_value) else []
         links.append(
             HiddenLink(
-                link_id=f"HL-{row['Node_A']}-{row['Node_B']}-{i}",
-                node_a=str(row["Node_A"]),
-                node_b=str(row["Node_B"]),
-                label_a=str(row["Label_A"]),
-                label_b=str(row["Label_B"]),
-                type_a=str(row["Type_A"]),
-                type_b=str(row["Type_B"]),
-                jaccard=float(row["Jaccard"]),
-                adamic_adar=float(row["Adamic_Adar"]),
-                combined_score=float(row["Combined_Score"]),
-                shared_neighbor_count=int(row["Shared_Neighbor_Count"]),
+                link_id=f"HL-{node_a}-{node_b}-{i}",
+                node_a=str(node_a),
+                node_b=str(node_b),
+                label_a=str(row.get("Label_A", row.get("label_a", ""))),
+                label_b=str(row.get("Label_B", row.get("label_b", ""))),
+                type_a=str(row.get("Type_A", row.get("entity_type_a", ""))),
+                type_b=str(row.get("Type_B", row.get("entity_type_b", ""))),
+                jaccard=float(row.get("Jaccard", row.get("jaccard", 0))),
+                adamic_adar=float(row.get("Adamic_Adar", row.get("adamic_adar", 0))),
+                combined_score=float(row.get("Combined_Score", row.get("combined_score", 0))),
+                shared_neighbor_count=int(
+                    row.get("Shared_Neighbor_Count", row.get("common_neighbors", len(shared)))
+                ),
                 shared_neighbors=shared,
-                note=str(row["Note"]),
+                note=str(row.get("Note", "AI-suggested — not a confirmed link")),
             )
         )
     return links

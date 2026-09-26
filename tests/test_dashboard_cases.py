@@ -59,8 +59,8 @@ class DashboardCaseLookupTests(unittest.TestCase):
         with (
             patch.object(
                 cases,
-                "_entity_identity_cache",
-                {
+                "_load_entity_identities",
+                return_value={
                     "ACC-001": {
                         "entity_label": "Example Account",
                         "entity_type": "Account",
@@ -88,7 +88,7 @@ class DashboardCaseLookupTests(unittest.TestCase):
         )
 
     def test_unknown_canonical_id_returns_not_found(self):
-        with patch.object(cases, "_entity_identity_cache", {}):
+        with patch.object(cases, "_load_entity_identities", return_value={}):
             with self.assertRaises(cases.HTTPException) as error:
                 cases.get_entity_cases("MISSING", user={"username": "investigator"})
 
@@ -106,7 +106,7 @@ class DashboardCaseLookupTests(unittest.TestCase):
             },
         }
         with (
-            patch.object(cases, "_entity_identity_cache", identities),
+            patch.object(cases, "_load_entity_identities", return_value=identities),
             patch.object(cases, "fetch_all") as fetch_all,
         ):
             with self.assertRaises(cases.HTTPException) as error:

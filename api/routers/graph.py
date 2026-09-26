@@ -6,20 +6,20 @@ render all 2,957 nodes at once if they just want one community or entity type.
 """
 
 import json
-from pathlib import Path
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.security import get_current_user
 
+from core.artifact_cache import FileArtifactCache
+from core.config import GRAPH_JSON
 from core.db import fetch_all
 from core.spiderweb_center import build_spiderweb_center, case_edge_status
 
 router = APIRouter(prefix="/api/graph", tags=["graph"])
 
-GRAPH_JSON_PATH = Path("output/graph.json")
-
-_graph_cache: dict | None = None
+GRAPH_JSON_PATH = GRAPH_JSON
+_graph_cache: FileArtifactCache[dict] = FileArtifactCache()
 
 _ENTITY_TYPE_ALIASES = {
     "phone": "mobile",
@@ -75,19 +75,25 @@ def _case_edge_payload(edge: dict) -> dict:
         "value": edge.get("weight", 1),
         "status": case_edge_status(edge),
         "provenance": provenance,
+        "date": edge.get("date", ""),
+        "sources": edge.get("sources", provenance),
+        "events": edge.get("events", []),
+        "rel_types": edge.get("rel_types", [edge.get("rel_type", "")]),
     }
 
 
 def _load_graph() -> dict:
-    """Load output/graph.json once and cache in memory — it only changes when
-    run_pipeline.py is re-run, not on every request."""
-    global _graph_cache
-    if _graph_cache is None:
-        if not GRAPH_JSON_PATH.exists():
-            raise HTTPException(status_code=404, detail="graph.json not found — run run_pipeline.py first")
-        with open(GRAPH_JSON_PATH) as f:
-            _graph_cache = json.load(f)
-    return _graph_cache
+    """Reload the graph when its configured artifact changes on disk."""
+    try:
+        return _graph_cache.load(
+            GRAPH_JSON_PATH,
+            lambda path: json.loads(path.read_text(encoding="utf-8")),
+        )
+    except FileNotFoundError as error:
+        raise HTTPException(
+            status_code=404,
+            detail="graph.json not found — run run_pipeline.py first",
+        ) from error
 
 
 @router.get("")
@@ -128,6 +134,12 @@ def get_graph(
             "to": e["target"],
             "title": e.get("rel_type", ""),
             "value": e.get("weight", 1),
+            "rel_type": e.get("rel_type", ""),
+            "source_file": e.get("source_file", ""),
+            "sources": e.get("sources", e.get("source_file", "")),
+            "date": e.get("date", ""),
+            "events": e.get("events", []),
+            "rel_types": e.get("rel_types", [e.get("rel_type", "")]),
         }
         for e in edges
     ]
@@ -135,6 +147,7 @@ def get_graph(
     return {
         "nodes": nodes,
         "edges": vis_edges,
+        "related_firs": data.get("related_firs", []),
         "meta": {"node_count": len(nodes), "edge_count": len(vis_edges), "full_meta": data.get("meta", {})},
     }
 
@@ -253,6 +266,11 @@ def get_case_graph(
         "nodes": final_nodes,
         "edges": center_result.edges,
         "internal_links": center_result.internal_links,
+        "related_firs": [
+            relation
+            for relation in data.get("related_firs", [])
+            if fir_id in (relation.get("fir_id"), relation.get("related_fir_id"))
+        ],
         "center_reason": center_result.center_reason,
         "meta": {
             "fir_id": fir_id,

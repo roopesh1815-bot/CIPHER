@@ -13,14 +13,15 @@ from pathlib import Path
 from fastapi import APIRouter, Depends, HTTPException, Query
 
 from api.security import get_current_user
+from core.artifact_cache import FileArtifactCache
 from core.config import CASE_SUMMARIES_JSON, ENTITIES_CSV
 from core.db import fetch_all, fetch_one
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/api/cases", tags=["cases"])
 
-_summaries_cache: dict[str, dict] | None = None
-_entity_identity_cache: dict[str, dict] | None = None
+_summaries_cache: FileArtifactCache[dict[str, dict]] = FileArtifactCache()
+_entity_identity_cache: FileArtifactCache[dict[str, dict]] = FileArtifactCache()
 
 _ENTITY_TYPE_ALIASES = {
     "phone": "mobile",
@@ -30,24 +31,25 @@ _ENTITY_TYPE_ALIASES = {
 
 
 def _load_entity_identities() -> dict[str, dict]:
-    """Load canonical IDs and labels from the existing resolved-entity output."""
-    global _entity_identity_cache
-    if _entity_identity_cache is None:
-        if not ENTITIES_CSV.exists():
-            raise HTTPException(
-                status_code=503,
-                detail="entities.csv not found — run entity resolution first",
-            )
-        with ENTITIES_CSV.open(encoding="utf-8-sig", newline="") as entity_file:
+    """Load current canonical IDs and labels from the resolved-entity output."""
+    if not ENTITIES_CSV.exists():
+        raise HTTPException(
+            status_code=503,
+            detail="entities.csv not found — run entity resolution first",
+        )
+
+    def load_identities(path: Path) -> dict[str, dict]:
+        with path.open(encoding="utf-8-sig", newline="") as entity_file:
             rows = csv.DictReader(entity_file)
-            _entity_identity_cache = {
+            return {
                 row["Canonical_ID"]: {
                     "entity_label": row["Entity_Value"],
                     "entity_type": row["Entity_Type"],
                 }
                 for row in rows
             }
-    return _entity_identity_cache
+
+    return _entity_identity_cache.load(ENTITIES_CSV, load_identities)
 
 
 def _normalize_entity_type(value: object) -> str:
@@ -56,20 +58,20 @@ def _normalize_entity_type(value: object) -> str:
 
 
 def _load_summaries() -> dict[str, dict]:
-    """Load case_summaries.json once, keyed by FIR_ID, cached in memory
-    (same pattern as api/routers/graph.py — refreshed only by re-running
-    the pipeline, not on every request)."""
-    global _summaries_cache
-    if _summaries_cache is None:
-        if not CASE_SUMMARIES_JSON.exists():
-            raise HTTPException(
-                status_code=404,
-                detail="case_summaries.json not found — run run_pipeline.py first",
-            )
-        with open(CASE_SUMMARIES_JSON, encoding="utf-8") as f:
-            rows = json.load(f)
-        _summaries_cache = {row["FIR_ID"]: row for row in rows}
-    return _summaries_cache
+    """Load case summaries keyed by FIR_ID and refresh after file changes."""
+    try:
+        return _summaries_cache.load(
+            CASE_SUMMARIES_JSON,
+            lambda path: {
+                row["FIR_ID"]: row
+                for row in json.loads(path.read_text(encoding="utf-8"))
+            },
+        )
+    except FileNotFoundError as error:
+        raise HTTPException(
+            status_code=404,
+            detail="case_summaries.json not found — run run_pipeline.py first",
+        ) from error
 
 
 def _narrative_preview(narrative: str, max_len: int = 160) -> str:

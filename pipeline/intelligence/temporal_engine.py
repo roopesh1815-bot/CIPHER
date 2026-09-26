@@ -7,9 +7,14 @@ repeat-offence rhythms, and rule-based alerts (e.g. a mobile appearing in
 
 import json
 from datetime import datetime
-from pathlib import Path
 
 import pandas as pd
+from core.config import (
+    CRIME_TYPE_TREND_CSV,
+    ENTITY_TIMELINES_JSON,
+    FIR_CSV,
+    TEMPORAL_ALERTS_CSV,
+)
 
 ALERT_WINDOW_DAYS = 90       # "short window" for the multi-case alert rule
 ALERT_MIN_CASES = 3          # cases within that window to trigger an alert
@@ -89,8 +94,8 @@ def detect_temporal_alerts(events_by_entity: dict) -> pd.DataFrame:
                 dated[j] for j in range(len(dates))
                 if dates[i] <= dates[j] <= window_end
             ]
-            if len(window_events) >= ALERT_MIN_CASES:
-                fir_ids = sorted({e["FIR_ID"] for e in window_events})
+            fir_ids = sorted({e["FIR_ID"] for e in window_events})
+            if len(fir_ids) >= ALERT_MIN_CASES:
                 alerts.append({
                     "Entity": mobile,
                     "Alert_Type": "Activity burst",
@@ -127,25 +132,34 @@ def build_case_type_trend(fir_df: pd.DataFrame) -> pd.DataFrame:
     return trend
 
 
-if __name__ == "__main__":
-    import sys
-    sys.path.insert(0, ".")
-
+def run(
+    fir_path=FIR_CSV,
+    timelines_path=ENTITY_TIMELINES_JSON,
+    alerts_path=TEMPORAL_ALERTS_CSV,
+    trend_path=CRIME_TYPE_TREND_CSV,
+) -> dict:
     mobile_cols = ["Suspect_Mobile", "Associate_Mobile", "Complainant_Mobile", "Witness_Mobile"]
-    fir_df = pd.read_csv("data/raw/fir_500.csv", dtype={col: str for col in mobile_cols})
-    
+    fir_df = pd.read_csv(fir_path, dtype={col: str for col in mobile_cols})
     events_by_entity = build_entity_timeline(fir_df)
     alerts_df = detect_temporal_alerts(events_by_entity)
     trend_df = build_case_type_trend(fir_df)
 
-    Path("data/processed").mkdir(parents=True, exist_ok=True)
+    with open(timelines_path, "w", encoding="utf-8") as timeline_file:
+        json.dump(events_by_entity, timeline_file, indent=2, default=str)
+    alerts_df.to_csv(alerts_path, index=False)
+    trend_df.to_csv(trend_path, index=False)
+    return {
+        "events_by_entity": events_by_entity,
+        "alerts_df": alerts_df,
+        "trend_df": trend_df,
+    }
 
-    with open("data/processed/entity_timelines.json", "w") as f:
-        json.dump(events_by_entity, f, indent=2)
 
-    alerts_df.to_csv("data/processed/temporal_alerts.csv", index=False)
-    trend_df.to_csv("data/processed/crime_type_trend.csv", index=False)
-
+if __name__ == "__main__":
+    import sys
+    sys.path.insert(0, ".")
+    results = run()
+    alerts_df = results["alerts_df"]
     print("\nSaved entity_timelines.json + temporal_alerts.csv + crime_type_trend.csv")
 
     if not alerts_df.empty:

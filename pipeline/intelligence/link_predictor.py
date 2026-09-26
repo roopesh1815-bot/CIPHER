@@ -16,17 +16,24 @@ import networkx as nx
 import pandas as pd
 
 from pipeline.graph.builder import build_graph
+from core.config import (
+    CDR_CSV,
+    ENTITIES_CSV,
+    FINANCIAL_CSV,
+    FIR_CSV,
+    LINK_PREDICTIONS_CSV,
+    LINK_PREDICTIONS_JSON,
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-ENTITIES_PATH = "data/processed/entities.csv"
-FIR_PATH      = "data/raw/fir_500.csv"
-CDR_PATH      = "data/raw/cdr_logs.csv"
-FIN_PATH      = "data/raw/financial_txns.csv"
-
-OUT_CSV  = "data/processed/hidden_links.csv"
-OUT_JSON = "data/processed/hidden_links.json"
+ENTITIES_PATH = ENTITIES_CSV
+FIR_PATH = FIR_CSV
+CDR_PATH = CDR_CSV
+FIN_PATH = FINANCIAL_CSV
+OUT_CSV = LINK_PREDICTIONS_CSV
+OUT_JSON = LINK_PREDICTIONS_JSON
 
 MIN_COMMON_NEIGHBORS = 1   # candidate pairs must share at least this many neighbors
 TOP_N = 100                 # how many predicted links to keep, ranked by combined score
@@ -71,7 +78,8 @@ def predict_links(G: nx.Graph, top_n: int = TOP_N) -> pd.DataFrame:
         return pd.DataFrame(columns=[
             "node_a", "node_b", "label_a", "label_b",
             "entity_type_a", "entity_type_b",
-            "jaccard", "adamic_adar", "common_neighbors", "combined_score",
+            "jaccard", "adamic_adar", "common_neighbors", "shared_neighbors",
+            "combined_score",
         ])
 
     jaccard_scores = {(u, v): s for u, v, s in nx.jaccard_coefficient(G, pairs)}
@@ -98,6 +106,9 @@ def predict_links(G: nx.Graph, top_n: int = TOP_N) -> pd.DataFrame:
             "jaccard": round(j, 4),
             "adamic_adar": round(aa, 4),
             "common_neighbors": len(common),
+            "shared_neighbors": "|".join(
+                str(G.nodes[n].get("label", n)) for n in common
+            ),
             "combined_score": round(combined, 4),
         })
 
@@ -116,7 +127,7 @@ if __name__ == "__main__":
     import sys
     sys.path.insert(0, ".")
 
-    G = build_graph(ENTITIES_PATH, FIR_PATH, CDR_PATH, FIN_PATH)
+    G = build_graph(str(ENTITIES_PATH), str(FIR_PATH), str(CDR_PATH), str(FIN_PATH))
 
     df = predict_links(G, top_n=TOP_N)
     save_predictions(df)
