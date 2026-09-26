@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>CIPHER — Alerts</title>
+
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/alerts.css">
+</head>
+
+<body>
+
+<header class="topbar">
+
+    <div class="brand">
+        CIPHER
+    </div>
+
+    <nav class="navigation">
+        <a href="/">Overview</a>
+        <a href="/cases">Case Manager</a>
+        <a href="/network-graph">Network Graph</a>
+        <a href="/key-influencers">Key Influencers</a>
+        <a href="/risk-scoring">Risk Scoring</a>
+        <a href="/alerts" class="active">Alerts</a>
+    </nav>
+
+    <a href="/logout" class="logout">Logout</a>
+
+</header>
+
+
+<main class="alerts-page">
+
+    <section class="page-header">
+
+        <div>
+            <h1>Alerts &amp; Intelligence</h1>
+
+            <p>
+                Structural anomalies and temporal activity alerts
+                detected by the CIPHER intelligence pipeline.
+            </p>
+        </div>
+
+    </section>
+
+
+    <!-- SUMMARY -->
+
+    <section class="summary-grid">
+
+        <div class="summary-card">
+            <div class="summary-label">Total Alerts</div>
+            <div id="totalAlerts" class="summary-value">—</div>
+        </div>
+
+        <div class="summary-card critical-card">
+            <div class="summary-label">Critical</div>
+            <div id="criticalAlerts" class="summary-value">—</div>
+        </div>
+
+        <div class="summary-card high-card">
+            <div class="summary-label">High</div>
+            <div id="highAlerts" class="summary-value">—</div>
+        </div>
+
+        <div class="summary-card medium-card">
+            <div class="summary-label">Medium</div>
+            <div id="mediumAlerts" class="summary-value">—</div>
+        </div>
+
+        <div class="summary-card low-card">
+            <div class="summary-label">Low</div>
+            <div id="lowAlerts" class="summary-value">—</div>
+        </div>
+
+    </section>
+
+
+    <!-- FILTERS -->
+
+    <section class="filters-panel">
+
+        <div class="filter-group">
+
+            <label for="alertType">
+                Alert Type
+            </label>
+
+            <select id="alertType">
+
+                <option value="">
+                    All types
+                </option>
+
+                <option value="anomaly">
+                    Structural Anomaly
+                </option>
+
+                <option value="temporal_burst">
+                    Temporal Burst
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="filter-group">
+
+            <label for="severity">
+                Severity
+            </label>
+
+            <select id="severity">
+
+                <option value="">
+                    All severities
+                </option>
+
+                <option value="Critical">
+                    Critical
+                </option>
+
+                <option value="High">
+                    High
+                </option>
+
+                <option value="Medium">
+                    Medium
+                </option>
+
+                <option value="Low">
+                    Low
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="filter-group search-group">
+
+            <label for="search">
+                Search
+            </label>
+
+            <input
+                type="text"
+                id="search"
+                placeholder="Entity, alert detail..."
+            >
+
+        </div>
+
+
+        <div class="filter-actions">
+
+            <button
+                id="applyFilters"
+                class="btn primary-btn"
+            >
+                Apply
+            </button>
+
+            <button
+                id="resetFilters"
+                class="btn secondary-btn"
+            >
+                Reset
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- STATUS -->
+
+    <div id="loadingState" class="state-message">
+        Loading alerts...
+    </div>
+
+    <div id="errorState" class="state-message error-state hidden">
+        Unable to load alerts.
+    </div>
+
+    <div id="emptyState" class="state-message hidden">
+        No alerts match the selected filters.
+    </div>
+
+
+    <!-- ALERT TABLE -->
+
+    <section
+        id="alertsContainer"
+        class="alerts-container hidden"
+    >
+
+        <div class="table-header">
+
+            <div>
+                <h2>Alert Feed</h2>
+
+                <span id="resultCount">
+                    0 alerts
+                </span>
+            </div>
+
+        </div>
+
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+
+                        <th>Severity</th>
+
+                        <th>Alert Type</th>
+
+                        <th>Entity</th>
+
+                        <th>Entity Type</th>
+
+                        <th>Details</th>
+
+                        <th>Cases</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="alertsTableBody">
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script src="/static/alerts.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CIPHER — Case Manager</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/cases.css">
+</head>
+<body>
+    <nav class="topbar">
+        <span class="brand">CIPHER</span>
+        <div class="nav-links">
+            <a href="/">Overview</a>
+            <a href="/cases" class="active">Case Manager</a>
+            <a href="/network-graph">Network Graph</a>
+        </div>
+        <a href="/auth/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <main class="cases-page">
+        <aside class="cases-controls">
+            <h2>Filters</h2>
+
+            <label for="risk-tier-filter">Risk tier</label>
+            <select id="risk-tier-filter">
+                <option value="">All tiers</option>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+
+            <label for="crime-type-filter">Crime type</label>
+            <select id="crime-type-filter">
+                <option value="">All types</option>
+            </select>
+
+            <label for="search-filter">Search</label>
+            <input type="text" id="search-filter" placeholder="FIR ID, location...">
+
+            <button id="apply-filters">Apply</button>
+            <button id="reset-filters" class="secondary">Reset</button>
+
+            <div id="cases-stats" class="cases-stats"></div>
+        </aside>
+
+        <section class="cases-list-panel">
+            <div id="cases-list"></div>
+            <div class="pagination">
+                <button id="prev-page" class="secondary">Previous</button>
+                <span id="page-label"></span>
+                <button id="next-page" class="secondary">Next</button>
+            </div>
+        </section>
+
+        <aside class="case-detail-panel" id="case-detail-panel">
+            <p class="hint">Select a case to see its details here.</p>
+        </aside>
+    </main>
+
+    <script src="/static/cases.js"></script>
+</body>
+</html>

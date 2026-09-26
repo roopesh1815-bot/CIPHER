@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CIPHER — Risk Scoring</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/cases.css">
+    <link rel="stylesheet" href="/static/risk.css">
+</head>
+<body>
+    <nav class="topbar">
+        <span class="brand">CIPHER</span>
+        <div class="nav-links">
+            <a href="/">Overview</a>
+            <a href="/cases">Case Manager</a>
+            <a href="/network-graph">Network Graph</a>
+            <a href="/key-influencers">Key Influencers</a>
+            <a href="/risk-scoring" class="active">Risk Scoring</a>
+        </div>
+        <a href="/auth/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <main class="cases-page">
+        <aside class="cases-controls">
+            <h2>Filters</h2>
+
+            <label for="entity-type-filter">Entity type</label>
+            <select id="entity-type-filter">
+                <option value="">All types</option>
+                <option value="Person">Person</option>
+                <option value="Account">Account</option>
+                <option value="Vehicle">Vehicle</option>
+                <option value="Mobile">Mobile</option>
+                <option value="Location">Location</option>
+            </select>
+
+            <label for="risk-tier-filter">Risk tier</label>
+            <select id="risk-tier-filter">
+                <option value="">All tiers</option>
+                <option value="Critical">Critical</option>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="Low">Low</option>
+            </select>
+
+            <label for="min-score-filter">Minimum score</label>
+            <input type="number" id="min-score-filter" placeholder="e.g. 50">
+
+            <label for="search-filter">Search</label>
+            <input type="text" id="search-filter" placeholder="Name...">
+
+            <button id="apply-filters">Apply</button>
+            <button id="reset-filters" class="secondary">Reset</button>
+
+            <div id="risk-stats" class="cases-stats"></div>
+        </aside>
+
+        <section class="cases-list-panel">
+            <div id="risk-list"></div>
+            <div class="pagination">
+                <button id="prev-page" class="secondary">Previous</button>
+                <span id="page-label"></span>
+                <button id="next-page" class="secondary">Next</button>
+            </div>
+        </section>
+
+        <aside class="case-detail-panel" id="risk-detail-panel">
+            <p class="hint">Select an entity to see its full risk breakdown here.</p>
+        </aside>
+    </main>
+
+    <script src="/static/risk.js"></script>
+</body>
+</html>

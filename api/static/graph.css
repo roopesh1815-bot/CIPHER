@@ -1,0 +1,173 @@
+.graph-page {
+    display: flex;
+    height: calc(100vh - 56px); /* adjust if your .topbar height differs */
+    overflow: hidden;
+}
+
+.graph-controls {
+    width: 300px;
+    flex-shrink: 0;
+    padding: 16px;
+    background: #12151c;
+    border-right: 1px solid #262b36;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+.graph-controls h2 {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    color: #e6e6e6;
+}
+
+.graph-controls label {
+    display: block;
+    margin: 10px 0 4px;
+    font-size: 0.8rem;
+    color: #9aa3b2;
+}
+
+.graph-controls select,
+.graph-controls input[type="text"],
+.graph-controls input[type="number"] {
+    width: 100%;
+    padding: 6px 8px;
+    background: #1c212c;
+    border: 1px solid #333846;
+    border-radius: 4px;
+    color: #e6e6e6;
+    font-size: 0.85rem;
+    box-sizing: border-box;
+}
+
+.graph-controls button {
+    margin-top: 12px;
+    margin-right: 8px;
+    padding: 7px 14px;
+    background: #4fd1c5;
+    border: none;
+    border-radius: 4px;
+    color: #0b0d12;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.graph-controls button.secondary {
+    background: transparent;
+    border: 1px solid #333846;
+    color: #e6e6e6;
+}
+
+.graph-controls button:hover {
+    opacity: 0.85;
+}
+
+.graph-stats {
+    margin-top: 16px;
+    padding: 10px;
+    background: #1c212c;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #9aa3b2;
+}
+
+.graph-stats strong {
+    color: #e6e6e6;
+}
+
+.node-detail {
+    margin-top: 16px;
+    padding: 10px;
+    background: #1c212c;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    max-height: 45vh;
+    overflow-y: auto;
+}
+
+.node-detail h3 {
+    margin: 0 0 8px;
+    color: #4fd1c5;
+    font-size: 0.95rem;
+}
+
+.node-detail .hint {
+    color: #6b7280;
+    font-style: italic;
+}
+
+.attr-row {
+    padding: 3px 0;
+    color: #c5cad4;
+    border-bottom: 1px solid #262b36;
+}
+
+.attr-row strong {
+    color: #9aa3b2;
+    font-weight: 500;
+}
+
+.neighbor-list {
+    margin-top: 10px;
+}
+
+.neighbor-list strong {
+    display: block;
+    margin-bottom: 6px;
+    color: #e6e6e6;
+}
+
+.neighbor-item {
+    padding: 5px 8px;
+    margin-bottom: 4px;
+    background: #12151c;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #c5cad4;
+}
+
+.neighbor-item:hover {
+    background: #262b36;
+    color: #4fd1c5;
+}
+
+.neighbor-list .hint {
+    color: #6b7280;
+    font-size: 0.78rem;
+    font-style: italic;
+    margin-top: 4px;
+}
+
+#network-container {
+    flex: 1;
+    background: #0b0d12;
+}
+
+/* Case-scoped graph banner */
+.case-banner {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px;
+    margin-bottom: 14px;
+    background: rgba(79, 209, 197, 0.08);
+    border: 1px solid #4fd1c5;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.case-banner select {
+    width: auto;
+}
+
+.secondary-link {
+    color: #4fd1c5;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+
+.secondary-link:hover {
+    text-decoration: underline;
+}

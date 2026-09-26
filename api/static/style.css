@@ -1,0 +1,33 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', system-ui, sans-serif; background: #0f1117; color: #e6e6e6; }
+
+.login-body { display: flex; align-items: center; justify-content: center; height: 100vh; }
+.login-card {
+    background: #1a1d27; padding: 2.5rem; border-radius: 12px;
+    width: 340px; box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+.login-card h1 { font-size: 1.8rem; letter-spacing: 2px; color: #4fd1c5; }
+.login-card .subtitle { color: #9aa1ac; margin-bottom: 1.5rem; font-size: 0.85rem; }
+.login-card label { display: block; margin-top: 1rem; font-size: 0.85rem; color: #c0c4cc; }
+.login-card input {
+    width: 100%; padding: 0.6rem; margin-top: 0.3rem; border-radius: 6px;
+    border: 1px solid #333846; background: #12141c; color: #e6e6e6;
+}
+.login-card button {
+    width: 100%; margin-top: 1.5rem; padding: 0.7rem; border: none; border-radius: 6px;
+    background: #4fd1c5; color: #0f1117; font-weight: 600; cursor: pointer;
+}
+.login-card button:hover { background: #3fc0b3; }
+.error-banner {
+    background: #3a1d24; color: #ff8a8a; padding: 0.6rem; border-radius: 6px;
+    font-size: 0.85rem; margin-bottom: 0.5rem;
+}
+.footer-note { margin-top: 1.5rem; font-size: 0.7rem; color: #5c626e; text-align: center; }
+
+.topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 2rem; background: #1a1d27; border-bottom: 1px solid #262a36;
+}
+.brand { font-weight: 700; letter-spacing: 2px; color: #4fd1c5; }
+.logout-link { color: #9aa1ac; text-decoration: none; font-size: 0.85rem; }
+.content { padding: 2rem; }

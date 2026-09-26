@@ -1,0 +1,334 @@
+Canonical_ID,Label,Entity_Type,Anomaly_Type,Anomaly_Detail,Severity
+ACC-0016,Syn-Acc-100026,Account,Degree Spike,Degree 212.49677499999996 >> mean 11.0,High
+PER-0041,Hariharan Palanisamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0024,Nithin Velan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0124,Chandran Subramani,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0060,Madhan Babu,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0213,Hariharan Prakash,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0212,Rajesh Karuppasamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0095,Udhay Anand,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0113,Jagan Raman,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0259,Chithra Kannan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0203,Karthik Velan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0247,Elango Shankar,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0244,Thirumal Velan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0100,Balaji Karuppasamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0170,Janani Devi,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0389,Babu Krishnan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0039,Jeeva Natarajan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0091,Vignesh Balan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0227,Ezhilan Ramasamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0178,Saravanan Anand,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0181,Abirami Raj,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0108,Murugan Karuppasamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0306,Dharani Selvam,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0073,Gokul Sundaram,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0206,Mathan Velan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0093,Vasanth Mani,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0010,Vasanth Gopal,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0303,Yogesh Gopal,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0022,Pandian Thangaraj,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0015,Dinesh Subramani,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0365,Karthik Shankar,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0258,Anand Palanisamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0141,Senthil Krishnan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0253,Harish Murugan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|SocialMedia,High
+PER-0355,Ajith Nathan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0284,Kishore Arumugam,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0043,Arun Babu,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0048,Murugan Sundaram,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0075,Hariharan Raj,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0137,Gunasekar Anand,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial,High
+PER-0052,Mathan Raman,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0357,Vijay Raman,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0019,Madhan Palanisamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0352,Yuvaraj Natarajan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0175,Sathish Sundaram,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0351,Rajesh Chandran,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0356,Senthil Natarajan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0089,Praveen Sekar,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0331,Sanjay Velan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0280,Sanjay Gopal,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0069,Jagan Anand,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0235,Nithin Subramani,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0299,Hemanth Raj,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0135,Vasanthi Bai,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0310,Mathan Balan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0154,Bharathi Raj,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0279,Rakesh Muthu,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0003,Dinesh Prakash,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial,High
+PER-0316,Mohan Ramasamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0184,Prakash Muthu,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|SocialMedia,High
+PER-0193,Vignesh Thangaraj,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0240,Elango Prakash,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0369,Hemanth Arumugam,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0057,Abirami Krishnan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0031,Prakash Palanisamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0098,Karthik Nathan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0314,Gopal Natarajan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0051,Mohan Kumar,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0313,Ezhilan Rajan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0028,Selvam Rajan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0242,Ganesh Selvam,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0217,Sathish Subramani,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0309,Sathish Ramasamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0012,Thirumal Palanisamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0360,Sanjay Palanisamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0300,Logesh Subramani,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0297,Karthik Balan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0379,Gopal Mani,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0373,Anand Muthu,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0221,Nithin Murugan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0243,Bharath Selvam,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0132,Arjun Shankar,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0194,Rakesh Gopal,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0087,Anand Krishnan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0398,Sanjay Shankar,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0198,Mohan Sekar,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0347,Bharath Balan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0026,Hariharan Subramani,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0084,Gokul Gopal,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0033,Vignesh Natarajan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0287,Venkat Prakash,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0112,Eswari Raj,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0162,Karthik Thangaraj,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0345,Sanjay Anand,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0080,Nandha Karuppasamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|SocialMedia,High
+PER-0023,Ganesh Shankar,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0308,Kannan Shankar,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0067,Logesh Karuppasamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+ACC-0051,Syn-Acc-100059,Account,Degree Spike,Degree 156.75111 >> mean 11.0,High
+ACC-0045,Syn-Acc-100016,Account,Degree Spike,Degree 194.02714500000008 >> mean 11.0,High
+ACC-0007,Syn-Acc-100051,Account,Degree Spike,Degree 151.00335999999996 >> mean 11.0,High
+ACC-0053,Syn-Acc-100020,Account,Degree Spike,Degree 170.76313499999998 >> mean 11.0,High
+ACC-0012,Syn-Acc-100053,Account,Degree Spike,Degree 147.00958500000002 >> mean 11.0,High
+ACC-0024,Syn-Acc-100078,Account,Degree Spike,Degree 157.47064999999998 >> mean 11.0,High
+ACC-0049,Syn-Acc-100065,Account,Degree Spike,Degree 154.13816000000003 >> mean 11.0,High
+ACC-0082,Syn-Acc-100043,Account,Degree Spike,Degree 146.9513 >> mean 11.0,High
+ACC-0086,Syn-Acc-100098,Account,Degree Spike,Degree 148.05153000000004 >> mean 11.0,High
+PER-0005,Vignesh Subramani,Person,Degree Spike,Degree 113.49333333333333 >> mean 11.0,High
+PER-0183,Venkat Palanisamy,Person,Degree Spike,Degree 132.95000000000002 >> mean 11.0,High
+PER-0085,Madhan Murugan,Person,Degree Spike,Degree 134.88666666666668 >> mean 11.0,High
+PER-0027,Sanjay Raj,Person,Degree Spike,Degree 156.79 >> mean 11.0,High
+PER-0001,Lavanya Ammal,Person,Degree Spike,Degree 119.95666666666666 >> mean 11.0,High
+PER-0067,Logesh Karuppasamy,Person,Degree Spike,Degree 142.9466666666667 >> mean 11.0,High
+PER-0032,Arun Prakash,Person,Degree Spike,Degree 126.51666666666668 >> mean 11.0,High
+ACC-0072,Syn-Acc-100089,Account,Degree Spike,Degree 182.0690549999999 >> mean 11.0,High
+PER-0076,Hariharan Babu,Person,Degree Spike,Degree 118.62 >> mean 11.0,High
+ACC-0006,Syn-Acc-100072,Account,Degree Spike,Degree 184.59442499999997 >> mean 11.0,High
+ACC-0021,Syn-Acc-100027,Account,Degree Spike,Degree 181.46074 >> mean 11.0,High
+PER-0076,Hariharan Babu,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+ACC-0015,Syn-Acc-100076,Account,Degree Spike,Degree 180.46416 >> mean 11.0,High
+ACC-0022,Syn-Acc-100054,Account,Degree Spike,Degree 179.99214999999995 >> mean 11.0,High
+ACC-0080,Syn-Acc-100008,Account,Degree Spike,Degree 116.47531000000001 >> mean 11.0,High
+ACC-0005,Syn-Acc-100071,Account,Degree Spike,Degree 184.67248999999998 >> mean 11.0,High
+ACC-0003,Syn-Acc-100069,Account,Degree Spike,Degree 210.26900000000003 >> mean 11.0,High
+ACC-0035,Syn-Acc-100033,Account,Degree Spike,Degree 186.42811500000005 >> mean 11.0,High
+ACC-0014,Syn-Acc-100003,Account,Degree Spike,Degree 142.632205 >> mean 11.0,High
+ACC-0066,Syn-Acc-100006,Account,Degree Spike,Degree 155.070335 >> mean 11.0,High
+ACC-0047,Syn-Acc-100084,Account,Degree Spike,Degree 183.639785 >> mean 11.0,High
+ACC-0064,Syn-Acc-100068,Account,Degree Spike,Degree 167.24535 >> mean 11.0,High
+ACC-0020,Syn-Acc-100077,Account,Degree Spike,Degree 181.45493 >> mean 11.0,High
+ACC-0038,Syn-Acc-100002,Account,Degree Spike,Degree 152.78812000000005 >> mean 11.0,High
+ACC-0027,Syn-Acc-100047,Account,Degree Spike,Degree 140.953055 >> mean 11.0,High
+ACC-0031,Syn-Acc-100080,Account,Degree Spike,Degree 137.02125999999998 >> mean 11.0,High
+ACC-0040,Syn-Acc-100057,Account,Degree Spike,Degree 191.06871999999998 >> mean 11.0,High
+ACC-0001,Syn-Acc-100055,Account,Degree Spike,Degree 188.49735999999993 >> mean 11.0,High
+PER-0365,Karthik Shankar,Person,Degree Spike,Degree 116.80333333333336 >> mean 11.0,High
+ACC-0087,Syn-Acc-100099,Account,Degree Spike,Degree 172.157915 >> mean 11.0,High
+PER-0005,Vignesh Subramani,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0183,Venkat Palanisamy,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0085,Madhan Murugan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+ACC-1059,Ext-Acc-214314,Account,Bridge Node,Betweenness 0.0067 with low degree 1.77736,High
+ACC-0908,Ext-Acc-213164,Account,Bridge Node,Betweenness 0.0067 with low degree 1.97326,High
+PER-0078,Gokul Muthu,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0277,Karthik Rajan,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0129,Kishore Babu,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0284,Kishore Arumugam,Person,Degree Spike,Degree 115.54333333333335 >> mean 11.0,High
+PER-0117,Tamilarasan Muthu,Person,Multi-Source Suspect,Suspect confirmed in sources: CDR|FIR|Financial|SocialMedia,High
+PER-0141,Senthil Krishnan,Person,Degree Spike,Degree 128.62666666666667 >> mean 11.0,High
+PER-0010,Vasanth Gopal,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0037,Syn-Acc-100082,Account,High Financial Activity,Linked to 14 financial records,Medium
+PER-0182,Saravanan Sundaram,Person,High Financial Activity,Linked to 8 financial records,Medium
+PER-0014,Ajith Velan,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0077,Syn-Acc-100067,Account,High Financial Activity,Linked to 16 financial records,Medium
+PER-0247,Elango Shankar,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0039,Syn-Acc-100014,Account,High Financial Activity,Linked to 9 financial records,Medium
+PER-0341,Madhan Nathan,Person,High Financial Activity,Linked to 9 financial records,Medium
+ACC-0068,Syn-Acc-100066,Account,High Financial Activity,Linked to 16 financial records,Medium
+ACC-0052,Syn-Acc-100021,Account,High Financial Activity,Linked to 16 financial records,Medium
+ACC-0058,Syn-Acc-100005,Account,High Financial Activity,Linked to 17 financial records,Medium
+PER-0376,Harish Pandian,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0389,Babu Krishnan,Person,High Financial Activity,Linked to 8 financial records,Medium
+ACC-0042,Syn-Acc-100034,Account,High Financial Activity,Linked to 18 financial records,Medium
+PER-0074,Padmini Raj,Person,High Financial Activity,Linked to 8 financial records,Medium
+PER-0125,Saranya Murugan,Person,High Financial Activity,Linked to 10 financial records,Medium
+PER-0119,Amudha Kannan,Person,High Financial Activity,Linked to 8 financial records,Medium
+PER-0027,Sanjay Raj,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0385,Praveen Muthu,Person,High Financial Activity,Linked to 10 financial records,Medium
+ACC-0056,Syn-Acc-100007,Account,High Financial Activity,Linked to 15 financial records,Medium
+PER-0040,Deepa Selvam,Person,High Financial Activity,Linked to 8 financial records,Medium
+PER-0073,Gokul Sundaram,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0063,Syn-Acc-100088,Account,High Financial Activity,Linked to 15 financial records,Medium
+PER-0303,Yogesh Gopal,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0365,Karthik Shankar,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0025,Syn-Acc-100056,Account,High Financial Activity,Linked to 13 financial records,Medium
+PER-0177,Inban Balan,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0258,Anand Palanisamy,Person,High Financial Activity,Linked to 8 financial records,Medium
+PER-0163,Rakesh Krishnan,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0189,Deepak Subramani,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0346,Inban Pandian,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0270,Ravi Gopal,Person,High Financial Activity,Linked to 9 financial records,Medium
+PER-0121,Chandran Krishnan,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0315,Chithra Raman,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0082,Rajeshwari Rani,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0023,Syn-Acc-100052,Account,High Financial Activity,Linked to 13 financial records,Medium
+ACC-0081,Syn-Acc-100095,Account,High Financial Activity,Linked to 15 financial records,Medium
+PER-0223,Gunasekar Murugan,Person,High Financial Activity,Linked to 8 financial records,Medium
+PER-0077,Anand Arumugam,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0057,Syn-Acc-100041,Account,High Financial Activity,Linked to 14 financial records,Medium
+ACC-0019,Syn-Acc-100025,Account,High Financial Activity,Linked to 20 financial records,Medium
+PER-0307,Deviga Krishnan,Person,High Financial Activity,Linked to 8 financial records,Medium
+PER-0019,Madhan Palanisamy,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0078,Syn-Acc-100093,Account,High Financial Activity,Linked to 15 financial records,Medium
+ACC-0061,Syn-Acc-100038,Account,High Financial Activity,Linked to 8 financial records,Medium
+ACC-0069,Syn-Acc-100049,Account,High Financial Activity,Linked to 11 financial records,Medium
+PER-0331,Sanjay Velan,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0033,Syn-Acc-100081,Account,High Financial Activity,Linked to 16 financial records,Medium
+ACC-0009,Syn-Acc-100063,Account,High Financial Activity,Linked to 17 financial records,Medium
+ACC-0034,Syn-Acc-100013,Account,High Financial Activity,Linked to 12 financial records,Medium
+ACC-0011,Syn-Acc-100075,Account,High Financial Activity,Linked to 12 financial records,Medium
+ACC-0026,Syn-Acc-100046,Account,High Financial Activity,Linked to 13 financial records,Medium
+ACC-0076,Syn-Acc-100050,Account,High Financial Activity,Linked to 14 financial records,Medium
+ACC-0065,Syn-Acc-100061,Account,High Financial Activity,Linked to 11 financial records,Medium
+PER-0207,Murugan Babu,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0079,Syn-Acc-100094,Account,High Financial Activity,Linked to 12 financial records,Medium
+PER-0033,Vignesh Natarajan,Person,High Financial Activity,Linked to 8 financial records,Medium
+PER-0114,Elango Selvam,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0002,Syn-Acc-100070,Account,High Financial Activity,Linked to 11 financial records,Medium
+ACC-0004,Syn-Acc-100024,Account,High Financial Activity,Linked to 12 financial records,Medium
+PER-0204,Keerthana Sri,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0398,Sanjay Shankar,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0198,Mohan Sekar,Person,High Financial Activity,Linked to 8 financial records,Medium
+ACC-0075,Syn-Acc-100092,Account,High Financial Activity,Linked to 12 financial records,Medium
+ACC-0032,Syn-Acc-100048,Account,High Financial Activity,Linked to 12 financial records,Medium
+ACC-0028,Syn-Acc-100079,Account,High Financial Activity,Linked to 14 financial records,Medium
+ACC-0074,Syn-Acc-100091,Account,High Financial Activity,Linked to 14 financial records,Medium
+ACC-0010,Syn-Acc-100074,Account,High Financial Activity,Linked to 17 financial records,Medium
+ACC-0050,Syn-Acc-100086,Account,High Financial Activity,Linked to 10 financial records,Medium
+ACC-0013,Syn-Acc-100011,Account,High Financial Activity,Linked to 8 financial records,Medium
+ACC-0085,Syn-Acc-100097,Account,High Financial Activity,Linked to 9 financial records,Medium
+ACC-0036,Syn-Acc-100017,Account,High Financial Activity,Linked to 9 financial records,Medium
+ACC-0073,Syn-Acc-100029,Account,High Financial Activity,Linked to 11 financial records,Medium
+ACC-0067,Syn-Acc-100044,Account,High Financial Activity,Linked to 8 financial records,Medium
+ACC-0043,Syn-Acc-100058,Account,High Financial Activity,Linked to 11 financial records,Medium
+ACC-0071,Syn-Acc-100090,Account,High Financial Activity,Linked to 9 financial records,Medium
+ACC-0030,Syn-Acc-100064,Account,High Financial Activity,Linked to 12 financial records,Medium
+ACC-0044,Syn-Acc-100012,Account,High Financial Activity,Linked to 11 financial records,Medium
+ACC-0054,Syn-Acc-100087,Account,High Financial Activity,Linked to 11 financial records,Medium
+ACC-0029,Syn-Acc-100035,Account,High Financial Activity,Linked to 11 financial records,Medium
+ACC-0041,Syn-Acc-100032,Account,High Financial Activity,Linked to 11 financial records,Medium
+ACC-0083,Syn-Acc-100096,Account,High Financial Activity,Linked to 12 financial records,Medium
+ACC-0060,Syn-Acc-100040,Account,High Financial Activity,Linked to 11 financial records,Medium
+ACC-0084,Syn-Acc-100039,Account,High Financial Activity,Linked to 11 financial records,Medium
+PER-0218,Arun Mani,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0078,Gokul Muthu,Person,High Financial Activity,Linked to 10 financial records,Medium
+ACC-0070,Syn-Acc-100062,Account,High Financial Activity,Linked to 16 financial records,Medium
+ACC-0048,Syn-Acc-100085,Account,High Financial Activity,Linked to 10 financial records,Medium
+ACC-0017,Syn-Acc-100001,Account,High Financial Activity,Linked to 10 financial records,Medium
+ACC-0008,Syn-Acc-100073,Account,High Financial Activity,Linked to 12 financial records,Medium
+PER-0262,Praveen Anand,Person,High Financial Activity,Linked to 7 financial records,Medium
+ACC-0064,Syn-Acc-100068,Account,High Financial Activity,Linked to 58 financial records,Medium
+PER-0071,Nithin Thangaraj,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0253,Harish Murugan,Person,Degree Spike,Degree 103.41666666666669 >> mean 11.0,Medium
+PER-0047,Uma Raj,Person,Degree Spike,Degree 96.31666666666666 >> mean 11.0,Medium
+PER-0013,Ramya Bai,Person,Degree Spike,Degree 85.71 >> mean 11.0,Medium
+PER-0258,Anand Palanisamy,Person,Degree Spike,Degree 83.88 >> mean 11.0,Medium
+PER-0042,Rakesh Anand,Person,Degree Spike,Degree 94.70666666666666 >> mean 11.0,Medium
+PER-0015,Dinesh Subramani,Person,Degree Spike,Degree 101.57000000000001 >> mean 11.0,Medium
+PER-0083,Babu Selvam,Person,Degree Spike,Degree 96.2 >> mean 11.0,Medium
+PER-0022,Pandian Thangaraj,Person,Degree Spike,Degree 85.98666666666668 >> mean 11.0,Medium
+LOC-0002,Roja Park Main Street,Location,Degree Spike,Degree 94.0 >> mean 11.0,Medium
+PER-0010,Vasanth Gopal,Person,Degree Spike,Degree 109.47333333333334 >> mean 11.0,Medium
+PER-0093,Vasanth Mani,Person,Degree Spike,Degree 100.83 >> mean 11.0,Medium
+PER-0080,Nandha Karuppasamy,Person,Degree Spike,Degree 104.20333333333333 >> mean 11.0,Medium
+PER-0023,Ganesh Shankar,Person,Degree Spike,Degree 106.44333333333334 >> mean 11.0,Medium
+PER-0223,Gunasekar Murugan,Person,Degree Spike,Degree 77.31333333333333 >> mean 11.0,Medium
+PER-0074,Padmini Raj,Person,Degree Spike,Degree 80.58333333333334 >> mean 11.0,Medium
+ACC-0062,Syn-Acc-100060,Account,Degree Spike,Degree 81.83981 >> mean 11.0,Medium
+PER-0117,Tamilarasan Muthu,Person,Degree Spike,Degree 74.34 >> mean 11.0,Medium
+PER-0169,Anitha Raj,Person,Degree Spike,Degree 84.14666666666665 >> mean 11.0,Medium
+PER-0277,Karthik Rajan,Person,Degree Spike,Degree 110.0 >> mean 11.0,Medium
+PER-0351,Rajesh Chandran,Person,Degree Spike,Degree 86.03333333333335 >> mean 11.0,Medium
+PER-0115,Nithin Balan,Person,Degree Spike,Degree 76.77666666666667 >> mean 11.0,Medium
+PER-0101,Abirami Sekar,Person,Degree Spike,Degree 87.70666666666666 >> mean 11.0,Medium
+PER-0043,Arun Babu,Person,Degree Spike,Degree 93.03333333333333 >> mean 11.0,Medium
+PER-0100,Balaji Karuppasamy,Person,Degree Spike,Degree 81.56000000000002 >> mean 11.0,Medium
+PER-0259,Chithra Kannan,Person,Degree Spike,Degree 90.07333333333332 >> mean 11.0,Medium
+PER-0113,Jagan Raman,Person,Degree Spike,Degree 90.04666666666668 >> mean 11.0,Medium
+PER-0212,Rajesh Karuppasamy,Person,Degree Spike,Degree 79.93 >> mean 11.0,Medium
+PER-0060,Madhan Babu,Person,Degree Spike,Degree 84.71 >> mean 11.0,Medium
+PER-0041,Hariharan Palanisamy,Person,Degree Spike,Degree 75.08999999999999 >> mean 11.0,Medium
+PER-0203,Karthik Velan,Person,Degree Spike,Degree 85.01333333333335 >> mean 11.0,Medium
+PER-0145,Tamilselvi Devi,Person,Degree Spike,Degree 83.66000000000003 >> mean 11.0,Medium
+PER-0355,Ajith Nathan,Person,Degree Spike,Degree 98.05 >> mean 11.0,Medium
+PER-0094,Bharathi Ammal,Person,Degree Spike,Degree 84.06000000000002 >> mean 11.0,Medium
+PER-0206,Mathan Velan,Person,Degree Spike,Degree 105.24666666666667 >> mean 11.0,Medium
+PER-0144,Padmini Bai,Person,Degree Spike,Degree 74.38333333333334 >> mean 11.0,Medium
+PER-0352,Yuvaraj Natarajan,Person,Degree Spike,Degree 87.69666666666666 >> mean 11.0,Medium
+PER-0019,Madhan Palanisamy,Person,Degree Spike,Degree 78.73333333333335 >> mean 11.0,Medium
+LOC-0016,Sindhu Garden Residential Colony,Location,Degree Spike,Degree 79.0 >> mean 11.0,Medium
+PER-0097,Rajesh Mani,Person,Degree Spike,Degree 79.55333333333331 >> mean 11.0,Medium
+PER-0052,Mathan Raman,Person,Degree Spike,Degree 92.91999999999999 >> mean 11.0,Medium
+PER-0137,Gunasekar Anand,Person,Degree Spike,Degree 83.22 >> mean 11.0,Medium
+PER-0048,Murugan Sundaram,Person,Degree Spike,Degree 96.96000000000001 >> mean 11.0,Medium
+PER-0104,Padmini Sri,Person,Degree Spike,Degree 74.50666666666665 >> mean 11.0,Medium
+PER-0175,Sathish Sundaram,Person,Degree Spike,Degree 101.37 >> mean 11.0,Medium
+ACC-0062,Syn-Acc-100060,Account,High Financial Activity,Linked to 18 financial records,Medium
+PER-0123,Karthik Pandian,Person,Degree Spike,Degree 76.57666666666667 >> mean 11.0,Medium
+PER-0277,Karthik Rajan,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+ACC-0040,Syn-Acc-100057,Account,High Financial Activity,Linked to 64 financial records,Medium
+ACC-0021,Syn-Acc-100027,Account,High Financial Activity,Linked to 73 financial records,Medium
+ACC-0014,Syn-Acc-100003,Account,High Financial Activity,Linked to 54 financial records,Medium
+ACC-0006,Syn-Acc-100072,Account,High Financial Activity,Linked to 61 financial records,Medium
+ACC-0082,Syn-Acc-100043,Account,High Financial Activity,Linked to 59 financial records,Medium
+ACC-0051,Syn-Acc-100059,Account,High Financial Activity,Linked to 65 financial records,Medium
+ACC-0045,Syn-Acc-100016,Account,High Financial Activity,Linked to 62 financial records,Medium
+ACC-0007,Syn-Acc-100051,Account,High Financial Activity,Linked to 55 financial records,Medium
+ACC-0053,Syn-Acc-100020,Account,High Financial Activity,Linked to 66 financial records,Medium
+ACC-0012,Syn-Acc-100053,Account,High Financial Activity,Linked to 62 financial records,Medium
+ACC-0024,Syn-Acc-100078,Account,High Financial Activity,Linked to 63 financial records,Medium
+ACC-0087,Syn-Acc-100099,Account,High Financial Activity,Linked to 71 financial records,Medium
+ACC-0049,Syn-Acc-100065,Account,High Financial Activity,Linked to 65 financial records,Medium
+ACC-0086,Syn-Acc-100098,Account,High Financial Activity,Linked to 61 financial records,Medium
+ACC-0072,Syn-Acc-100089,Account,High Financial Activity,Linked to 65 financial records,Medium
+PER-0180,Sangeetha Sri,Person,High Financial Activity,Linked to 8 financial records,Medium
+PER-0094,Bharathi Ammal,Person,High Financial Activity,Linked to 7 financial records,Medium
+PER-0183,Venkat Palanisamy,Person,High Financial Activity,Linked to 10 financial records,Medium
+PER-0277,Karthik Rajan,Person,High Financial Activity,Linked to 11 financial records,Medium
+ACC-0031,Syn-Acc-100080,Account,High Financial Activity,Linked to 61 financial records,Medium
+ACC-0027,Syn-Acc-100047,Account,High Financial Activity,Linked to 61 financial records,Medium
+ACC-0038,Syn-Acc-100002,Account,High Financial Activity,Linked to 61 financial records,Medium
+ACC-0020,Syn-Acc-100077,Account,High Financial Activity,Linked to 66 financial records,Medium
+PER-0085,Madhan Murugan,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+PER-0023,Ganesh Shankar,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+PER-0093,Vasanth Mani,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+PER-0015,Dinesh Subramani,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+PER-0043,Arun Babu,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+PER-0048,Murugan Sundaram,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+PER-0019,Madhan Palanisamy,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+PER-0024,Nithin Velan,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+PER-0091,Vignesh Balan,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|TransactionMobile|Witness,Medium
+ACC-0055,Syn-Acc-100045,Account,High Financial Activity,Linked to 8 financial records,Medium
+PER-0184,Prakash Muthu,Person,Cross-Role Conflict,Same entity in roles: Associate|Callee|Caller|SocialMention|Suspect|Witness,Medium
+ACC-0015,Syn-Acc-100076,Account,High Financial Activity,Linked to 69 financial records,Medium
+ACC-0022,Syn-Acc-100054,Account,High Financial Activity,Linked to 79 financial records,Medium
+ACC-0080,Syn-Acc-100008,Account,High Financial Activity,Linked to 52 financial records,Medium
+ACC-0005,Syn-Acc-100071,Account,High Financial Activity,Linked to 59 financial records,Medium
+ACC-0003,Syn-Acc-100069,Account,High Financial Activity,Linked to 67 financial records,Medium
+ACC-0035,Syn-Acc-100033,Account,High Financial Activity,Linked to 74 financial records,Medium
+ACC-0066,Syn-Acc-100006,Account,High Financial Activity,Linked to 58 financial records,Medium
+ACC-0001,Syn-Acc-100055,Account,High Financial Activity,Linked to 63 financial records,Medium
+ACC-0047,Syn-Acc-100084,Account,High Financial Activity,Linked to 62 financial records,Medium
+ACC-0016,Syn-Acc-100026,Account,High Financial Activity,Linked to 82 financial records,Medium
+ACC-0046,Syn-Acc-100083,Account,High Financial Activity,Linked to 8 financial records,Medium

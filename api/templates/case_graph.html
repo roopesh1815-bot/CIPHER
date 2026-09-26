@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CIPHER — Case Graph</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/case_graph.css">
+  <script src="/static/vendor/vis-network.min.js"></script>
+</head>
+<body>
+  <header class="topnav">
+    <div class="brand">CIPHER</div>
+    <nav>
+      <span class="brand">CIPHER</span>
+      <div class="nav-links">
+        <a href="/">Overview</a>
+        <a href="/cases">Case Manager</a>
+        <a href="/network-graph">Network Graph</a>
+        <a href="/key-influencers">Key Influencers</a>
+        <a href="/risk-scoring">Risk Scoring</a>
+        <a href="/alerts">Alerts</a>
+        <a href="/hidden-links">Hidden Links</a>
+        <a href="/communities">Communities</a>
+    </div>
+    <a href="/auth/logout" class="logout-link">Logout</a>
+    </nav>
+    <a href="/auth/logout" class="logout">Logout</a>
+  </header>
+
+  <main class="case-graph-layout">
+    <div class="case-graph-header">
+      <h2>Case Network — <span id="fir-id-label">{{ fir_id }}</span></h2>
+      <a href="/cases" class="back-link">&larr; Back to Case Manager</a>
+    </div>
+    <div id="graph-container"></div>
+    <div id="edge-tooltip" class="edge-tooltip hidden"></div>
+  </main>
+
+  <script>
+    const FIR_ID = "{{ fir_id }}";
+  </script>
+  <script src="/static/case_graph.js"></script>
+</body>
+</html>

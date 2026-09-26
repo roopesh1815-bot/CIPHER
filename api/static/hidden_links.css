@@ -1,0 +1,27 @@
+.list-panel { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; }
+
+.link-card {
+  background: var(--panel-bg, #131b2e);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 14px 18px;
+  cursor: pointer;
+}
+.link-card:hover { border-color: #2dd4bf55; }
+.link-card.selected { border-color: #2dd4bf; }
+
+.link-card .pair { font-size: 15px; font-weight: 600; color: #e5e7eb; }
+.link-card .types { font-size: 13px; color: #9ca3af; margin-top: 2px; }
+
+.link-card .badges { margin-top: 8px; display: flex; gap: 8px; flex-wrap: wrap; }
+.badge {
+  font-size: 12px; padding: 2px 8px; border-radius: 999px;
+  background: #1f2937; color: #d1d5db;
+}
+.badge.score { background: #164e63; color: #67e8f9; }
+
+.link-card .note { margin-top: 8px; font-size: 13px; color: #f59e0b; font-style: italic; }
+
+.detail-panel h2 { color: #2dd4bf; margin-top: 0; }
+.detail-panel .shared-list { list-style: none; padding: 0; }
+.detail-panel .shared-list li { padding: 4px 0; border-bottom: 1px solid #1f2937; }

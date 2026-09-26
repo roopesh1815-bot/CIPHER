@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CIPHER — Network Graph</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/graph.css">
+    <script src="/static/vendor/vis-network.min.js"></script>
+</head>
+<body>
+    <nav class="topbar">
+        <span class="brand">CIPHER</span>
+        <div class="nav-links">
+            <a href="/">Overview</a>
+            <a href="/cases">Case Manager</a>
+            <a href="/network-graph" class="active">Network Graph</a>
+        </div>
+        <a href="/auth/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <main class="graph-page">
+        <aside class="graph-controls">
+            <div id="case-banner" class="case-banner" style="display:none;">
+                <div id="case-banner-text"></div>
+                <label for="case-hops">Hops</label>
+                <select id="case-hops">
+                    <option value="1" selected>1</option>
+                    <option value="2">2</option>
+                </select>
+                <a href="/network-graph" class="secondary-link">← Full graph</a>
+            </div>
+
+            <h2>Filters</h2>
+
+            <label for="entity-type-filter">Entity Type</label>
+            <select id="entity-type-filter">
+                <option value="">All types</option>
+            </select>
+
+            <label for="community-filter">Community ID</label>
+            <input type="number" id="community-filter" placeholder="e.g. 0">
+
+            <label for="search-filter">Search label</label>
+            <input type="text" id="search-filter" placeholder="Search by name...">
+
+            <label for="limit-filter">Max nodes shown</label>
+            <select id="limit-filter">
+                <option value="300">300 (fast)</option>
+                <option value="800" selected>800</option>
+                <option value="2000">2000</option>
+                <option value="">All (2,957 — may be slow)</option>
+            </select>
+
+            <button id="apply-filters">Apply</button>
+            <button id="reset-filters" class="secondary">Reset</button>
+
+            <div id="graph-stats" class="graph-stats"></div>
+
+            <div id="node-detail" class="node-detail">
+                <p class="hint">Click a node to see its details here.</p>
+            </div>
+        </aside>
+
+        <div id="network-container"></div>
+    </main>
+
+    <script src="/static/graph.js"></script>
+</body>
+</html>

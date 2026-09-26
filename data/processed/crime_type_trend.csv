@@ -1,0 +1,336 @@
+Month,Crime_Type,Count
+2025-01,Auto Theft,1
+2025-01,Bank Transaction Fraud,2
+2025-01,Forged Document,1
+2025-01,Highway Robbery,1
+2025-01,Illegal Occupation,1
+2025-01,Job Offer Cheating,1
+2025-01,Mobile Theft,1
+2025-01,Neighbour Harassment,1
+2025-01,Property Damage,2
+2025-01,Truck Theft,1
+2025-01,UPI Fraud,1
+2025-02,Chit Fund Fraud,1
+2025-02,Forged Document,1
+2025-02,House Burglary,1
+2025-02,Investment Fraud,1
+2025-02,Missing Adult,2
+2025-02,Mobile Theft,2
+2025-02,Property Damage,1
+2025-02,Property Theft,1
+2025-02,Suspected Narcotics Transport,1
+2025-02,Truck Theft,2
+2025-03,Auto Theft,1
+2025-03,Bank Transaction Fraud,1
+2025-03,Car Theft,1
+2025-03,Chit Fund Fraud,1
+2025-03,Gold Chain Snatching,1
+2025-03,Missing Student,1
+2025-03,Motorcycle Theft,1
+2025-03,Physical Assault,1
+2025-03,Pickpocketing,5
+2025-03,Property Dispute Threat,1
+2025-03,Property Sale Cheating,1
+2025-03,Property Theft,3
+2025-03,Street Robbery,1
+2025-03,Truck Theft,1
+2025-03,UPI Fraud,1
+2025-04,Account Takeover,1
+2025-04,Car Theft,1
+2025-04,Extortion Call,1
+2025-04,Investment Fraud,2
+2025-04,Job Offer Cheating,1
+2025-04,Missing Elderly Person,1
+2025-04,Missing Student,1
+2025-04,Mobile Theft,1
+2025-04,Motorcycle Theft,1
+2025-04,Online Shopping Fraud,1
+2025-04,Phishing,1
+2025-04,Property Damage,1
+2025-04,Property Dispute Threat,1
+2025-04,Property Theft,1
+2025-04,Shop Theft,1
+2025-04,Street Robbery,1
+2025-04,Suspected Narcotics Sale,1
+2025-04,Truck Theft,1
+2025-05,Advance Payment Cheating,1
+2025-05,Digital Blackmail,1
+2025-05,Forged Signature,1
+2025-05,Gambling Den Report,1
+2025-05,Group Assault,1
+2025-05,Illegal Occupation,1
+2025-05,Loan Recovery Harassment,1
+2025-05,Missing Adult,1
+2025-05,Missing Student,1
+2025-05,Neighbour Harassment,2
+2025-05,Physical Assault,2
+2025-05,Pickpocketing,4
+2025-05,Property Theft,1
+2025-05,Street Robbery,2
+2025-05,Suspected Narcotics Sale,2
+2025-05,UPI Fraud,1
+2025-05,Vandalism,1
+2025-06,Extortion Call,1
+2025-06,Forged Document,1
+2025-06,Forged Signature,1
+2025-06,Group Assault,2
+2025-06,Job Offer Cheating,1
+2025-06,Loan Fraud,2
+2025-06,Missing Student,1
+2025-06,Mobile Theft,1
+2025-06,Motorcycle Theft,1
+2025-06,Neighbour Harassment,4
+2025-06,Online Shopping Fraud,1
+2025-06,Phishing,1
+2025-06,Physical Assault,1
+2025-06,Pickpocketing,1
+2025-06,Street Altercation,1
+2025-06,Suspected Narcotics Sale,1
+2025-06,Threatening Call,1
+2025-06,Vandalism,2
+2025-07,Advance Payment Cheating,1
+2025-07,Auto Theft,1
+2025-07,Bank Transaction Fraud,3
+2025-07,Chit Fund Fraud,1
+2025-07,Investment Fraud,1
+2025-07,Loan Fraud,1
+2025-07,Missing Adult,1
+2025-07,Missing Student,2
+2025-07,Online Shopping Fraud,3
+2025-07,Phishing,3
+2025-07,Second-hand Vehicle Sale Cheating,2
+2025-07,Street Altercation,2
+2025-07,Threatening Call,1
+2025-07,UPI Fraud,4
+2025-08,Account Takeover,1
+2025-08,Advance Payment Cheating,1
+2025-08,Bank Transaction Fraud,4
+2025-08,Business Extortion,2
+2025-08,Chit Fund Fraud,1
+2025-08,Extortion Call,2
+2025-08,Forged Document,1
+2025-08,Group Assault,2
+2025-08,Illegal Occupation,3
+2025-08,Investment Fraud,2
+2025-08,Loan Fraud,1
+2025-08,Missing Adult,1
+2025-08,Missing Elderly Person,1
+2025-08,Motorcycle Theft,3
+2025-08,Neighbour Harassment,1
+2025-08,Phishing,1
+2025-08,Physical Assault,1
+2025-08,Property Damage,1
+2025-08,Property Theft,4
+2025-08,Street Altercation,1
+2025-08,Threat Message,3
+2025-08,UPI Fraud,3
+2025-08,Vandalism,2
+2025-09,Bank Transaction Fraud,1
+2025-09,Business Extortion,2
+2025-09,Chit Fund Fraud,1
+2025-09,Digital Blackmail,1
+2025-09,Group Assault,5
+2025-09,House Burglary,1
+2025-09,Illegal Occupation,2
+2025-09,Investment Fraud,1
+2025-09,Job Offer Cheating,1
+2025-09,Loan Fraud,1
+2025-09,Missing Student,3
+2025-09,Motorcycle Theft,1
+2025-09,Online Shopping Fraud,2
+2025-09,Property Damage,1
+2025-09,Street Altercation,1
+2025-09,Two-Wheeler Chain Snatching,2
+2025-09,UPI Fraud,3
+2025-10,Advance Payment Cheating,4
+2025-10,Bank Transaction Fraud,2
+2025-10,Forged Signature,1
+2025-10,Gold Chain Snatching,2
+2025-10,Group Assault,2
+2025-10,Land Encroachment,1
+2025-10,Loan Fraud,2
+2025-10,Loan Recovery Harassment,1
+2025-10,Missing Adult,2
+2025-10,Mobile Theft,3
+2025-10,Neighbour Harassment,1
+2025-10,Online Shopping Fraud,1
+2025-10,Phishing,2
+2025-10,Physical Assault,3
+2025-10,Property Damage,1
+2025-10,Scooter Theft,2
+2025-10,Shop Theft,2
+2025-10,Street Altercation,4
+2025-10,Threat Message,1
+2025-10,Vandalism,1
+2025-11,Bank Transaction Fraud,2
+2025-11,Farm Land Trespass,1
+2025-11,Group Assault,2
+2025-11,Illegal Occupation,4
+2025-11,Loan Recovery Harassment,1
+2025-11,Phishing,3
+2025-11,Property Theft,4
+2025-11,Shop Robbery,2
+2025-11,Threat Message,1
+2025-11,UPI Fraud,2
+2025-11,Van Theft,1
+2025-12,Auto Theft,1
+2025-12,Business Extortion,1
+2025-12,Forged Document,1
+2025-12,House Burglary,1
+2025-12,Illegal Occupation,1
+2025-12,Loan Fraud,1
+2025-12,Missing Student,1
+2025-12,Mobile Theft,2
+2025-12,Motorcycle Theft,1
+2025-12,Online Betting Complaint,1
+2025-12,Phone Harassment,1
+2025-12,Pickpocketing,1
+2025-12,Property Sale Cheating,1
+2025-12,Property Theft,4
+2025-12,Scooter Theft,1
+2025-12,Shop Robbery,2
+2025-12,Shop Theft,1
+2025-12,Street Altercation,2
+2025-12,Street Robbery,2
+2025-12,Two-Wheeler Chain Snatching,1
+2025-12,Vandalism,1
+2026-01,Auto Theft,2
+2026-01,Bank Transaction Fraud,3
+2026-01,Digital Blackmail,1
+2026-01,Fake Certificate,1
+2026-01,Forged Signature,1
+2026-01,Group Assault,3
+2026-01,Illegal Occupation,1
+2026-01,Loan Fraud,1
+2026-01,Loan Recovery Harassment,1
+2026-01,Missing Elderly Person,1
+2026-01,Phishing,1
+2026-01,Property Damage,1
+2026-01,Property Theft,2
+2026-01,Scooter Theft,3
+2026-01,Shop Robbery,1
+2026-01,Shop Theft,2
+2026-01,Street Altercation,2
+2026-01,Threatening Call,1
+2026-01,Vandalism,1
+2026-02,Auto Theft,1
+2026-02,Gambling Den Report,1
+2026-02,Gold Chain Snatching,2
+2026-02,Group Assault,1
+2026-02,Highway Robbery,2
+2026-02,Loan Fraud,1
+2026-02,Loan Recovery Harassment,1
+2026-02,Missing Adult,1
+2026-02,Missing Student,1
+2026-02,Mobile Theft,1
+2026-02,Motorcycle Theft,1
+2026-02,Phishing,2
+2026-02,Property Trespass,1
+2026-02,Scooter Theft,2
+2026-02,Shop Theft,1
+2026-02,Two-Wheeler Chain Snatching,1
+2026-03,Account Takeover,1
+2026-03,Bank Transaction Fraud,1
+2026-03,Chit Fund Fraud,1
+2026-03,Gold Chain Snatching,1
+2026-03,House Burglary,1
+2026-03,Illegal Occupation,1
+2026-03,Investment Fraud,1
+2026-03,Land Encroachment,1
+2026-03,Missing Student,1
+2026-03,Motorcycle Theft,2
+2026-03,Neighbour Harassment,2
+2026-03,Physical Assault,1
+2026-03,Scooter Theft,1
+2026-03,Shop Theft,3
+2026-03,Street Robbery,2
+2026-03,Truck Theft,1
+2026-03,UPI Fraud,1
+2026-03,Vandalism,1
+2026-04,Account Takeover,1
+2026-04,Bank Transaction Fraud,1
+2026-04,Chit Fund Fraud,2
+2026-04,Forged Signature,1
+2026-04,Highway Robbery,1
+2026-04,Illegal Occupation,1
+2026-04,Job Offer Cheating,1
+2026-04,Land Encroachment,1
+2026-04,Loan Fraud,1
+2026-04,Motorcycle Theft,2
+2026-04,Neighbour Harassment,1
+2026-04,Phishing,2
+2026-04,Pickpocketing,1
+2026-04,Property Theft,2
+2026-04,Scooter Theft,1
+2026-04,Shop Robbery,1
+2026-04,Shop Theft,1
+2026-04,UPI Fraud,7
+2026-04,Vandalism,1
+2026-05,Auto Theft,3
+2026-05,Digital Blackmail,2
+2026-05,Fake Certificate,2
+2026-05,Highway Robbery,1
+2026-05,House Burglary,1
+2026-05,Investment Fraud,2
+2026-05,Job Offer Cheating,3
+2026-05,Loan Fraud,1
+2026-05,Missing Adult,2
+2026-05,Missing Student,1
+2026-05,Online Shopping Fraud,1
+2026-05,Phishing,4
+2026-05,Pickpocketing,1
+2026-05,Shop Theft,2
+2026-05,Vandalism,2
+2026-06,Advance Payment Cheating,1
+2026-06,Bank Transaction Fraud,2
+2026-06,Extortion Call,1
+2026-06,Forged Document,1
+2026-06,Highway Robbery,1
+2026-06,Missing Adult,1
+2026-06,Mobile Theft,1
+2026-06,Phishing,2
+2026-06,Phone Harassment,1
+2026-06,Pickpocketing,3
+2026-06,Property Damage,1
+2026-06,Second-hand Vehicle Sale Cheating,1
+2026-06,Shop Burglary,1
+2026-06,Truck Theft,1
+2026-06,UPI Fraud,2
+2026-07,Car Theft,1
+2026-07,Chit Fund Fraud,2
+2026-07,Fake Certificate,1
+2026-07,Highway Robbery,1
+2026-07,Job Offer Cheating,1
+2026-07,Missing Adult,1
+2026-07,Missing Student,1
+2026-07,Motorcycle Theft,2
+2026-07,Online Betting Complaint,1
+2026-07,Pickpocketing,3
+2026-07,Property Sale Cheating,1
+2026-07,Property Trespass,1
+2026-07,Scooter Theft,1
+2026-07,Second-hand Vehicle Sale Cheating,1
+2026-07,Shop Theft,1
+2026-07,Street Robbery,2
+2026-07,UPI Fraud,4
+2026-08,Chit Fund Fraud,1
+2026-08,Highway Robbery,1
+2026-08,Illegal Occupation,1
+2026-08,Investment Fraud,2
+2026-08,Job Offer Cheating,1
+2026-08,Land Encroachment,1
+2026-08,Loan Fraud,2
+2026-08,Mobile Theft,1
+2026-08,Motorcycle Theft,1
+2026-08,Phishing,1
+2026-08,Property Theft,1
+2026-08,Scooter Theft,1
+2026-08,Shop Burglary,1
+2026-08,UPI Fraud,4
+2026-09,Loan Fraud,1
+2026-09,Loan Recovery Harassment,1
+2026-09,Missing Elderly Person,1
+2026-09,Motorcycle Theft,1
+2026-09,Pickpocketing,1
+2026-09,Shop Robbery,1
+2026-09,Vandalism,1

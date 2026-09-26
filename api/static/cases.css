@@ -1,0 +1,71 @@
+.cases-page { display: flex; height: calc(100vh - 60px); }
+
+.cases-controls {
+    width: 260px; background: #1a1d27; padding: 1.2rem; overflow-y: auto;
+    border-right: 1px solid #262a36; flex-shrink: 0;
+}
+.cases-controls h2 { font-size: 1rem; color: #4fd1c5; margin-bottom: 1rem; }
+.cases-controls label { display: block; font-size: 0.75rem; color: #9aa1ac; margin-top: 0.9rem; }
+.cases-controls select, .cases-controls input {
+    width: 100%; padding: 0.4rem; margin-top: 0.3rem; border-radius: 6px;
+    border: 1px solid #333846; background: #12141c; color: #e6e6e6; font-size: 0.85rem;
+}
+.cases-controls button {
+    width: 100%; margin-top: 1rem; padding: 0.5rem; border: none; border-radius: 6px;
+    background: #4fd1c5; color: #0f1117; font-weight: 600; cursor: pointer; font-size: 0.85rem;
+}
+.cases-controls button.secondary { background: #333846; color: #e6e6e6; margin-top: 0.5rem; }
+.cases-stats { margin-top: 1.2rem; font-size: 0.75rem; color: #9aa1ac; line-height: 1.6; }
+
+.cases-list-panel { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; background: #0f1117; }
+
+.case-card {
+    background: #1a1d27; border: 1px solid #262a36; border-radius: 8px;
+    padding: 0.9rem 1.1rem; margin-bottom: 0.7rem; cursor: pointer; transition: border-color 0.15s;
+}
+.case-card:hover { border-color: #4fd1c5; }
+.case-card.selected { border-color: #4fd1c5; background: #1f2430; }
+.case-card-top { display: flex; justify-content: space-between; align-items: center; }
+.case-card-id { font-weight: 600; color: #e6e6e6; font-size: 0.9rem; }
+.tier-badge { font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 10px; font-weight: 600; }
+.tier-Critical { background: #4a1414; color: #f5a3a3; }
+.tier-High { background: #4a2f14; color: #f5c98a; }
+.tier-Medium { background: #143a4a; color: #8ad4f5; }
+.tier-Low { background: #143a1f; color: #8af5a3; }
+.case-card-meta { font-size: 0.78rem; color: #9aa1ac; margin-top: 0.3rem; }
+.case-card-preview { font-size: 0.78rem; color: #c0c4cc; margin-top: 0.4rem; line-height: 1.4; }
+
+.pagination { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; }
+.pagination button {
+    padding: 0.4rem 0.9rem; border-radius: 6px; border: 1px solid #333846;
+    background: #1a1d27; color: #e6e6e6; cursor: pointer; font-size: 0.8rem;
+}
+.pagination button:disabled { opacity: 0.4; cursor: default; }
+#page-label { font-size: 0.8rem; color: #9aa1ac; }
+
+.case-detail-panel {
+    width: 340px; background: #1a1d27; padding: 1.2rem; overflow-y: auto;
+    border-left: 1px solid #262a36; flex-shrink: 0; font-size: 0.82rem; line-height: 1.6;
+}
+.case-detail-panel .hint { color: #5c626e; }
+.case-detail-panel h3 { color: #4fd1c5; font-size: 1rem; margin-bottom: 0.6rem; }
+.detail-row { color: #c0c4cc; margin-bottom: 0.3rem; }
+.detail-row strong { color: #e6e6e6; }
+.detail-narrative { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid #262a36; color: #c0c4cc; }
+.entity-list { margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid #262a36; }
+.entity-item { padding: 0.2rem 0; color: #9aa1ac; }
+.entity-item .role-tag { color: #5c626e; font-size: 0.72rem; }
+.view-graph-btn {
+    display: inline-block;
+    margin: 8px 0 14px;
+    padding: 6px 12px;
+    background: rgba(79, 209, 197, 0.12);
+    border: 1px solid #4fd1c5;
+    border-radius: 5px;
+    color: #4fd1c5;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+.view-graph-btn:hover {
+    background: rgba(79, 209, 197, 0.22);
+}

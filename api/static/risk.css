@@ -1,0 +1,4 @@
+.risk-score-num { font-size: 1.3rem; font-weight: 700; }
+.risk-card-badges { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.4rem; }
+.risk-card-badges span { font-size: 0.7rem; padding: 0.15rem 0.5rem; border-radius: 10px; background: #262a36; color: #9aa1ac; }
+.tier-dist-row { display: flex; justify-content: space-between; }

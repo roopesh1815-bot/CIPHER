@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CIPHER — Key Influencers</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/cases.css">
+    <link rel="stylesheet" href="/static/influencers.css">
+</head>
+<body>
+    <nav class="topbar">
+        <span class="brand">CIPHER</span>
+        <div class="nav-links">
+            <a href="/">Overview</a>
+            <a href="/cases">Case Manager</a>
+            <a href="/network-graph">Network Graph</a>
+            <a href="/key-influencers" class="active">Key Influencers</a>
+        </div>
+        <a href="/auth/logout" class="logout-link">Logout</a>
+    </nav>
+
+    <main class="cases-page">
+        <aside class="cases-controls">
+            <h2>Filters</h2>
+
+            <label for="entity-type-filter">Entity type</label>
+            <select id="entity-type-filter">
+                <option value="">All types</option>
+            </select>
+
+            <label for="min-score-filter">Minimum influence score</label>
+            <input type="number" id="min-score-filter" min="0" max="100" placeholder="e.g. 50">
+
+            <label for="search-filter">Search</label>
+            <input type="text" id="search-filter" placeholder="Name...">
+
+            <button id="apply-filters">Apply</button>
+            <button id="reset-filters" class="secondary">Reset</button>
+
+            <div id="influencers-stats" class="cases-stats"></div>
+        </aside>
+
+        <section class="cases-list-panel">
+            <div id="influencers-list" class="influencers-list"></div>
+            <div class="pagination">
+                <button id="prev-page" class="secondary">Previous</button>
+                <span id="page-label"></span>
+                <button id="next-page" class="secondary">Next</button>
+            </div>
+        </section>
+
+        <aside class="case-detail-panel" id="influencer-detail-panel">
+            <p class="hint">Select an entity to see its full influence breakdown here.</p>
+        </aside>
+    </main>
+
+    <script src="/static/influencers.js"></script>
+</body>
+</html>

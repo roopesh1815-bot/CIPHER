@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CIPHER — Hidden Links</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/hidden_links.css">
+</head>
+<body>
+  <header class="topnav">
+    <div class="brand">CIPHER</div>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/cases">Case Manager</a>
+      <a href="/network-graph">Network Graph</a>
+      <a href="/key-influencers">Key Influencers</a>
+      <a href="/risk-scoring">Risk Scoring</a>
+      <a href="/alerts">Alerts</a>
+      <a href="/hidden-links" class="active">Hidden Links</a>
+      <a href="/communities">Communities</a>
+    </nav>
+    <a href="/auth/logout" class="logout">Logout</a>
+  </header>
+
+  <main class="layout">
+    <aside class="filters">
+      <h3>Filters</h3>
+      <label>Entity type
+        <select id="filter-type">
+          <option value="">All types</option>
+          <option value="Person">Person</option>
+          <option value="Account">Account</option>
+          <option value="Vehicle">Vehicle</option>
+          <option value="Phone">Phone</option>
+          <option value="Location">Location</option>
+        </select>
+      </label>
+      <label>Minimum score
+        <input type="number" id="filter-min-score" step="0.01" placeholder="e.g. 0.5">
+      </label>
+      <label>Search
+        <input type="text" id="filter-search" placeholder="Name...">
+      </label>
+      <button id="apply-btn">Apply</button>
+      <button id="reset-btn" class="secondary">Reset</button>
+      <p class="total-count">Total matching: <span id="total-count">0</span></p>
+    </aside>
+
+    <section class="list-panel" id="link-list"></section>
+
+    <aside class="detail-panel" id="detail-panel">
+      <p class="empty-state">Select a hidden link to see details</p>
+    </aside>
+  </main>
+
+  <script src="/static/hidden_links.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+.score-critical {
+    background: rgba(239, 68, 68, 0.18);
+    color: #ef4444;
+    border: 1px solid #ef4444;
+}
+.score-high {
+    background: rgba(249, 115, 22, 0.18);
+    color: #f97316;
+    border: 1px solid #f97316;
+}
+.score-medium {
+    background: rgba(234, 179, 8, 0.18);
+    color: #eab308;
+    border: 1px solid #eab308;
+}
+.score-low {
+    background: rgba(107, 114, 128, 0.18);
+    color: #9ca3af;
+    border: 1px solid #9ca3af;
+}
